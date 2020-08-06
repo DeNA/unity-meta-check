@@ -1,0 +1,8 @@
+/.git
+/.gitignore
+/dist
+/test
+/tmp
+/Dockerfile
+testdata
+.env

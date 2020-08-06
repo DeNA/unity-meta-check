@@ -1,0 +1,39 @@
+#!/bin/bash
+set -euo pipefail
+
+BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
+IMAGE='docker.pkg.github.com/dena/unity-meta-check/unity-meta-check'
+
+
+usage() {
+	cat - 1>&2 <<-EOS
+usage: build-image [<options>]
+
+OPTIONS
+	-h, --help    print this usage
+	--latest      also tag as latest
+EOS
+}
+
+
+main() {
+	local arg="${1:-}"
+	if [[ "$arg" == "-h" || "$arg" == "--help" || "$arg" == "help" ]]; then
+		usage
+		false
+	fi
+
+	(cd "$BASE_DIR"
+		local version
+		version="$("$BASE_DIR/scripts/print-version")"
+
+		docker build -t "$IMAGE:$version" .
+
+		if [[ "$arg" == "--latest" ]]; then
+			docker tag "$IMAGE:$version" "$IMAGE:latest"
+		fi
+	)
+}
+
+
+main "$@"

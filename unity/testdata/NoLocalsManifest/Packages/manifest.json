@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "com.example.exists": "1.0.0",
+    "com.example.does.not.exist": "1.0.0"
+  }
+}

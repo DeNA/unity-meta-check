@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "com.example.local": "file:../LocalPackages/com.example.local"
+  }
+}

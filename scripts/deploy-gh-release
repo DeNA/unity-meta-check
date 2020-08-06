@@ -1,0 +1,82 @@
+#!/bin/bash
+set -euo pipefail
+
+BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
+
+
+echo-stderr() {
+	local message="$*"
+	printf "%s\n" "$message" 1>&2
+}
+
+
+throw() {
+	local message="$*"
+	echo-stderr "error: $message"
+	false
+}
+
+
+usage() {
+	cat - 1>&2 <<-EOS
+usage: deploy-gh-release [<options>]
+
+OPTIONS
+	-h, --help    print this usage
+EOS
+}
+
+
+usage-error() {
+	local message="$*"
+	echo-stderr "$message"
+	usage
+	false
+}
+
+
+main() {
+	local arg="${1:-}"
+	if [[ "$arg" == "--help" ]] || [[  "$arg" == "-h" ]]; then
+		usage
+		false
+	fi
+
+	local version
+	version="$("$BASE_DIR/scripts/print-version")"
+
+	gh --version || throw "gh must be available (see https://cli.github.com/)"
+	gh auth status
+
+	(cd "$BASE_DIR"
+		(git tag | grep -Fqx "$version") || throw "tag does not exist: '$version'"
+		git push origin "$version" || throw "a tag has the same name exists, so if still you want to overwrite the tag, please remove the tag on the remote and try again."
+
+		echo-stderr "ENVIRONMENT"
+		echo-stderr "revision to deploy:\n$(git rev-parse HEAD)\n"
+		echo-stderr "go version:\n$(go version)\n"
+
+		git checkout "$version" || throw "make git status clean and try again."
+
+		echo-stderr "DEPLOY TO GITHUB RELEASES"
+		echo-stderr "creating a github release if it does not exist..."
+		gh release view "$version" || gh release create "$version"
+		echo-stderr
+		
+		echo-stderr "building executables..."
+		make clean test all
+		echo-stderr
+
+		[[ -d "./dist" ]] || throw "cannot find the generated distribution dir: '${BASE_DIR}/dist'"
+
+		echo-stderr "uploading executables..."
+		(cd "./dist"
+			find . -type f | sed 's/\.\///' | xargs gh release upload "$version"
+		)
+
+		gh release view -w "$version"
+	)
+}
+
+
+main "$@"

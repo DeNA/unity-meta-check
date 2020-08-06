@@ -1,0 +1,6 @@
+[submodule "testdata/ValidProject"]
+	path = testdata/ValidProject
+	url = git@github.com:DeNA/unity-meta-check-ValidProject
+[submodule "testdata/InvalidProject"]
+	path = testdata/InvalidProject
+	url = git@github.com:DeNA/unity-meta-check-InvalidProject

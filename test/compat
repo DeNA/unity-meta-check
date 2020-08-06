@@ -1,0 +1,68 @@
+#!/bin/bash
+set -euo pipefail
+
+
+throw() {
+	local message="$*"
+	printf "error: %s\n" "$message" 1>&2
+	false
+}
+
+
+error_help() {
+	local message="$*"
+	printf "error: %s\n" "$message" 1>&2
+	usage
+	false
+}
+
+
+usage() {
+	echo 'usage: compat <old-unity-meta-check> <new-unity-meta-check> <workdir>'
+	echo
+	echo 'ARGUMENTS'
+	echo '  <old-unity-meta-check>    path to old unity-meta-check executable'
+	echo '  <new-unity-meta-check>    path to new unity-meta-check executable'
+	echo '  <workdir>    path to directory where compatibility tests running on'
+	echo
+	echo 'EXAMPLES'
+	echo '  compat path/to/old/unity-meta-check path/to/new-unity-meta-check path/to/Unity/Project'
+}
+
+
+main() {
+	local old_bin="${1:-}"
+	local new_bin="${2:-}"
+	local work_dir="${3:-}"
+
+	"$old_bin" -version >/dev/null || error_help "old binary does not exist: $old_bin"
+	"$new_bin" -version >/dev/null || error_help "new binary does not exist: $new_bin"
+
+	[[ -d "$work_dir" ]] || error_help "working directory does not exist: $work_dir"
+	(cd "$work_dir"
+		git rev-parse --is-inside-work-tree >/dev/null || error_help "working directory is not in a git repository"
+
+		local tmpdir
+		tmpdir="$(mktemp -d "/tmp/unity-meta-check-compat.XXXXXX")"
+
+		set +e
+		"$old_bin" > "${tmpdir}/old" 2>&1
+		local old_status=$?
+
+		"$new_bin" > "${tmpdir}/new" 2>&1
+		local new_status=$?
+		set -e
+
+		if [[ $old_status -eq $new_status ]]; then
+			echo "ok: match exit status ($old_status != $new_status)"
+			rm -r "$tmpdir"
+		else
+			echo "ng: exit status mismatch ($old_status != $new_status)"
+			diff -u "${tmpdir}/old" "${tmpdir}/new"
+			false
+		fi
+	)
+}
+
+
+main "$@"

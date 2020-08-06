@@ -1,0 +1,74 @@
+#!/bin/bash
+set -euo pipefail
+
+BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
+
+
+echo-stderr() {
+	local message="$*"
+	printf "%s\n" "$message" 1>&2
+}
+
+
+throw() {
+	local message="$*"
+	echo-stderr "error: $message"
+	false
+}
+
+
+usage() {
+	cat - 1>&2 <<-EOS
+usage: deploy-bins [<options>]
+
+OPTIONS
+	-h, --help    print this usage
+EOS
+}
+
+
+usage-error() {
+	local message="$*"
+	echo-stderr "$message"
+	usage
+	false
+}
+
+
+main() {
+	local arg="${1:-}"
+	if [[ "$arg" == "--help" ]] || [[  "$arg" == "-h" ]]; then
+		usage
+		false
+	fi
+
+	local version
+	version="$("$BASE_DIR/scripts/print-version")"
+
+	(cd "$BASE_DIR"
+		(git tag | grep -Fqx "$version") || throw "tag does not exist: '$version'"
+		git push origin "$version" || throw "a tag has the same name exists on the remote, so if still you want to overwrite the tag, please remove the tag on the remote and try again."
+
+		echo-stderr "DEPLOY TO UNITY-META-CHECK-BINS"
+
+		mkdir -p ./tmp
+		cd ./tmp
+		if [[ -d ./unity-meta-check-bins ]]; then
+			cd ./unity-meta-check-bins
+			git pull origin master
+		else
+			git clone git@github.com:DeNA/unity-meta-check-bins
+			cd ./unity-meta-check-bins
+		fi
+
+		./unity-meta-check-build-toolchains "$version"
+		git add .
+		git commit --allow-empty -m "Update executables to $version"
+
+		git tag "$version"
+		git push origin "$version"
+	)
+}
+
+
+main "$@"

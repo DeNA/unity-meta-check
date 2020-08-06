@@ -1,0 +1,79 @@
+#!/bin/bash
+set -euo pipefail
+
+BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
+
+
+has() {
+	local cmd="$1"
+	which "$cmd" >/dev/null 2>&1
+}
+
+
+echo-stderr() {
+	local message="$*"
+	printf "%s\n" "$message" 1>&2
+}
+
+
+throw() {
+	local message="$*"
+	echo-stderr "error: $message"
+	false
+}
+
+
+usage() {
+	cat - 1>&2 <<-EOS
+usage: deploy [<options>]
+
+OPTIONS
+	-h, --help    print this usage
+	--latest      also tag the docker image as the latest
+EOS
+}
+
+
+usage-error() {
+	local message="$*"
+	echo-stderr "$message"
+	usage
+	false
+}
+
+
+main() {
+	local arg="${1:-}"
+	if [[ "$arg" == "--help" ]] || [[  "$arg" == "-h" ]]; then
+		usage
+		false
+	fi
+
+	has go || throw "'go' must be installed (see https://golang.org)"
+	has gh || throw "'gh' must be installed (see https://cli.github.com)"
+	has docker || throw "'docker' must be installed (see https://www.docker.com)"
+
+	local version
+	version="$("$BASE_DIR/scripts/print-version")"
+
+	if (git tag | grep -Fqx "$version"); then
+		throw "a tag has the same name exists on local, so if still you want to overwrite the tag, please remove the tag on local and try again.: '$version'"
+	fi
+	git tag "$version"
+
+	(cd "$BASE_DIR"
+		./scripts/deploy-gh-release
+		./scripts/deploy-bins
+
+		if [[ "$arg" == "--latest" ]]; then
+			./scripts/build-image --latest
+			./scripts/push-image --latest
+		else
+			./scripts/build-image
+			./scripts/push-image
+		fi
+	)
+}
+
+
+main "$@"
