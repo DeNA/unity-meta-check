@@ -7,15 +7,12 @@ jobs:
       - run:
           name: Test go get
           command: |
-            git config --global url."git@github.com:".insteadOf "https://github.com/"
-            ssh -T -oStrictHostKeyChecking=no git@github.com || true
-
             go get github.com/DeNA/unity-meta-check
       - run:
           name: Test
           command: unity-meta-check --version
 
-  build-linux:
+  test-linux:
     docker:
       - image: cimg/go:1.14
 
@@ -27,7 +24,7 @@ jobs:
             git submodule update --init --recursive
             go test -v ./...
 
-  build-windows:
+  test-windows:
     resource_class: windows.medium
     machine:
       image: windows-default
@@ -44,10 +41,10 @@ jobs:
 workflows:
   version: 2
 
-  build-linux-and-windows:
+  test-linux-and-windows:
     jobs:
-      - build-linux
-      - build-windows
+      - test-linux
+      - test-windows
       - go_get:
           filters:
             branches:
