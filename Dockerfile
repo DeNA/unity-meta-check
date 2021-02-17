@@ -8,9 +8,9 @@ RUN make linux-amd64 && \
 	mv ./dist/unity-meta-check-github-pr-comment-linux-amd64 ./dist/unity-meta-check-github-pr-comment && \
 	mv ./dist/unity-meta-autofix-linux-amd64 ./dist/unity-meta-autofix
 
-FROM alpine:3.12
+FROM debian:buster-slim
 # https://circleci.com/docs/2.0/custom-images/#required-tools-for-primary-containers
-RUN apk add --no-cache git openssh tar gzip ca-certificates
+RUN apt-get update && apt-get install --no-install-recommends --yes git openssh-server tar gzip ca-certificates
 COPY --from=builder /go/src/unity-meta-check/dist/* /usr/bin/
 ENTRYPOINT ["unity-meta-check"]
 CMD ["-help"]
