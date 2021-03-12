@@ -4,7 +4,6 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/meta"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -20,7 +19,7 @@ func TestNewMetaCreator(t *testing.T) {
 		t.Run(string(metaType), func(t *testing.T) {
 			spyLogger := logging.SpyLogger()
 
-			workDir, err := ioutil.TempDir(os.TempDir(), "")
+			workDir, err := os.MkdirTemp(os.TempDir(), "")
 			if err != nil {
 				panic(err.Error())
 			}

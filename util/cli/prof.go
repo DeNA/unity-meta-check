@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime/pprof"
@@ -46,7 +45,7 @@ func NewCommandWithHeapProfile(cmd Command) Command {
 }
 
 func newProfFile() (io.WriteCloser, error) {
-	tmpDir, err := ioutil.TempDir(os.TempDir(), "")
+	tmpDir, err := os.MkdirTemp(os.TempDir(), "")
 	if err != nil {
 		return nil, err
 	}

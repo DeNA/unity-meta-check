@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/DeNA/unity-meta-check/util/logging"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -47,7 +47,7 @@ func NewPullRequestCommentSender(githubEndpoint *url.URL, token string, send Htt
 			return err
 		}
 
-		resBody, err := ioutil.ReadAll(res.Body)
+		resBody, err := io.ReadAll(res.Body)
 		if err != nil {
 			return err
 		}

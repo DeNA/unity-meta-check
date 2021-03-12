@@ -3,7 +3,7 @@ package unity
 import (
 	"encoding/json"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
-	"io/ioutil"
+	"os"
 )
 
 type ManifestJson struct {
@@ -13,7 +13,7 @@ type ManifestJson struct {
 var ManifestBasename typedpath.BaseName = "manifest.json"
 
 func ReadManifest(path typedpath.RawPath) (*ManifestJson, error) {
-	bytes, err := ioutil.ReadFile(string(path))
+	bytes, err := os.ReadFile(string(path))
 	if err != nil {
 		return nil, err
 	}

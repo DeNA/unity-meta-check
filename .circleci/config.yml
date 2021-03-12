@@ -2,7 +2,7 @@ version: 2
 jobs:
   go_get:
     docker:
-      - image: cimg/go:1.14
+      - image: cimg/go:1.16
     steps:
       - run:
           name: Test go get
@@ -14,7 +14,7 @@ jobs:
 
   test-linux:
     docker:
-      - image: cimg/go:1.14
+      - image: cimg/go:1.16
 
     steps:
       - checkout
