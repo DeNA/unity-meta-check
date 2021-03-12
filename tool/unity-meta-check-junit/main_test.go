@@ -20,7 +20,7 @@ func TestValid(t *testing.T) {
 		Stderr: stderr,
 	}
 
-	tmpDir, err := ioutil.TempDir(os.TempDir(), "")
+	tmpDir, err := os.MkdirTemp(os.TempDir(), "")
 	if err != nil {
 		t.Errorf("want nil, got %#v", err)
 		return

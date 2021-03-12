@@ -3,7 +3,6 @@ package repofinder
 import (
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/google/go-cmp/cmp"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -88,7 +87,7 @@ func TestFindOnRel(t *testing.T) {
 }
 
 func setUpTestDir() typedpath.RawPath {
-	workDir, err := ioutil.TempDir(os.TempDir(), "unity-meta-check-tests.")
+	workDir, err := os.MkdirTemp(os.TempDir(), "unity-meta-check-tests.")
 	if err != nil {
 		panic(err.Error())
 	}

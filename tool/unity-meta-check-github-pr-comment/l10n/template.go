@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -59,7 +58,7 @@ func ReadTemplateFile(path typedpath.RawPath) (*Template, error) {
 }
 
 func ReadTemplate(reader io.Reader) (*Template, error) {
-	bytes, err := ioutil.ReadAll(reader)
+	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
