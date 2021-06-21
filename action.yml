@@ -1,0 +1,114 @@
+name: 'Unity meta checker'
+description: 'Unity meta checker'
+author: 'DeNA Co., Ltd.'
+
+inputs:
+  path:
+    description: |
+      root directory of your Unity project or UPM package to check.
+      (default "$(git rev-parse --show-toplevel)")
+    default: ""
+    required: false
+  debug:
+    description: |
+      set log level to DEBUG (default INFO)
+    default: false
+    required: false
+  silent:
+    description: |
+      set log level to WARN (default INFO)
+    default: false
+    required: false
+  ## unity-meta-check options ##
+  unity_project:
+    description: |
+      check as Unity project
+    default: false
+    required: false
+  unity_project_sub_dir:
+    description: |
+      check as sub directory of Unity project
+      (check as UPM package)
+    default: false
+    required: false
+  ignore_file:
+    description: |
+      path to .meta-check-ignore
+    default: ""
+    required: false
+  ignore_dangling:
+    description: |
+      ignore dangling .meta
+    default: false
+    required: false
+  ignore_submodules:
+    description: |
+      ignore git submodules and nesting repositories
+      (this is RECOMMENDED but not enabled by default because it can cause to miss problems in submodules or nesting repositories)
+    default: false
+    required: false
+  no_ignore_case:
+    description: |
+      treat case of file paths
+    default: false
+    required: false
+
+  ## unity-meta-check options ##
+  auto_fix:
+    description: |
+      enable unity-meta-autofix
+    default: false
+    required: false
+  auto_fix_paths:
+    description: |
+      glob pattern to path where autofix allowed on (unity-meta-autofix)
+    default: ""
+    required: false
+  dry_run:
+    description: |
+      dry run (unity-meta-autofix)
+    default: false
+    required: false
+  fix_dangling:
+    description: |
+      fix dangling .meta (unity-meta-autofix)
+    default: true
+    required: false
+  fix_missing:
+    description: |
+      fix missing .meta (unity-meta-autofix)
+    default: true
+    required: false
+
+  ## unity-meta-check-junit options ##
+  junit_result_path:
+    description: |
+      output path to write JUnit report (unity-meta-check-junit)
+    default: ""
+    required: false
+
+  ## unity-meta-check-github-pr-comment options ##
+  lang:
+    description: |
+      language code (available: en, ja) (default "en") (unity-meta-check-github-pr-comment)
+    default: "en"
+    required: false
+  template_file:
+    description: |
+      custom template file (unity-meta-check-github-pr-comment)
+    default: ""
+    required: false
+  token:
+    description: |
+     GITHUB_TOKEN (contents: write, pull-requests: write) or a repo scoped Personal Access Token (PAT).
+    default: ${{ github.token }}
+    required: false
+
+runs:
+  using: 'docker'
+  image: 'GitHubActions.Dockerfile'
+  env:
+    GITHUB_TOKEN: ${{ inputs.token }}
+branding:
+  icon: 'image'
+  color: 'green'
