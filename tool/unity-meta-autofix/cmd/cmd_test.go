@@ -1,33 +1,25 @@
-package main
+package cmd
 
 import (
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/testutil"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
-func TestValid(t *testing.T) {
+func TestValidDryRun(t *testing.T) {
+	main := NewMain()
 	stdout := testutil.SpyWriteCloser(nil)
 	stderr := testutil.SpyWriteCloser(nil)
-
 	procInout := cli.ProcessInout{
 		Stdin:  strings.NewReader(""),
 		Stdout: stdout,
 		Stderr: stderr,
 	}
 
-	tmpDir, err := os.MkdirTemp(os.TempDir(), "")
-	if err != nil {
-		t.Errorf("want nil, got %#v", err)
-		return
-	}
-
-	main := NewMain()
-	actual := main([]string{filepath.Join(tmpDir, "valid.xml")}, procInout, cli.AnyEnv())
+	rootDir := filepath.Join("testdata", "ValidProject")
+	actual := main([]string{"-debug", "-dry-run", "-fix-missing", "-fix-dangling", "-root-dir", rootDir, "Assets/*"}, procInout, cli.AnyEnv())
 
 	expected := cli.ExitNormal
 	if actual != expected {
@@ -38,27 +30,21 @@ func TestValid(t *testing.T) {
 	}
 }
 
-func TestInvalid(t *testing.T) {
+func TestInvalidDryRun(t *testing.T) {
+	main := NewMain()
 	stdout := testutil.SpyWriteCloser(nil)
 	stderr := testutil.SpyWriteCloser(nil)
-
 	procInout := cli.ProcessInout{
-		Stdin:  strings.NewReader(`missing path/to/missing.meta
-dangling path/to/dangling.meta`),
+		Stdin:  strings.NewReader(`missing Missing.meta
+dangling Dangling.meta`),
 		Stdout: stdout,
 		Stderr: stderr,
 	}
 
-	tmpDir, err := ioutil.TempDir(os.TempDir(), "")
-	if err != nil {
-		t.Errorf("want nil, got %#v", err)
-		return
-	}
+	rootDir := filepath.Join("testdata", "InvalidProject")
+	actual := main([]string{"-debug", "-dry-run", "-fix-missing", "-fix-dangling", "-root-dir", rootDir, "Assets/*"}, procInout, cli.AnyEnv())
 
-	main := NewMain()
-	actual := main([]string{filepath.Join(tmpDir, "invalid.xml")}, procInout, cli.AnyEnv())
-
-	expected := cli.ExitAbnormal
+	expected := cli.ExitNormal
 	if actual != expected {
 		t.Logf("stdout:\n%s", stdout.Captured.String())
 		t.Logf("stderr:\n%s", stderr.Captured.String())
