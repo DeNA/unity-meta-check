@@ -1,0 +1,60 @@
+name: Develop
+on:
+  pull_request:
+
+jobs:
+  valid:
+    runs-on: ubuntu-latest
+    steps:
+    - name: clone
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - uses: ./
+      with:
+        path: ./testdata/ValidProject
+        debug: true
+  auto_fix:
+    runs-on: ubuntu-latest
+    steps:
+    - name: clone
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - uses: ./
+      with:
+        path: ./testdata/InvalidProject
+        debug: true
+        auto_fix: true
+        dry_run: true
+    - run: |
+        cd ./testdata/InvalidProject
+        git diff
+      if: failure()
+    # - name: Create Pull Request
+    #   if: failure()
+    #   uses: peter-evans/create-pull-request@v3
+    #   with:
+    #     base: ${{ github.ref }}
+    #     branch: ${{ github.ref }}_auto_fix
+    #     title: "Unity meta check auto-fix"
+    #     commit-message: "Unity meta check auto-fix"
+    #     delete-branch: true
+    #     labels: "unity-meta-check"
+    #     reviewers: ${{ env.GITHUB_ACTOR }}
+  junit:
+    runs-on: ubuntu-latest
+    steps:
+    - name: clone
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - uses: ./
+      with:
+        path: ./testdata/InvalidProject
+        debug: true
+        junit_result_path: output/junit_result.xml
+    - uses: actions/upload-artifact@v2
+      with:
+        name: unity-meta-check-junit-report
+        path: output/junit_result.xml
