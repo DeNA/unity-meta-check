@@ -2,7 +2,8 @@
 set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
-IMAGE='docker.pkg.github.com/dena/unity-meta-check/unity-meta-check'
+CIRCLECI_IMAGE='docker.pkg.github.com/dena/unity-meta-check/unity-meta-check-circleci'
+IMAGE='docker.pkg.github.com/dena/unity-meta-check/unity-meta-check-v2'
 
 
 usage() {
@@ -27,10 +28,14 @@ main() {
 		local version
 		version="$("$BASE_DIR/scripts/print-version")"
 
-		docker build -t "$IMAGE:$version" .
-
+		docker build -t "$IMAGE:$version" -f ./Dockerfile .
 		if [[ "$arg" == "--latest" ]]; then
 			docker tag "$IMAGE:$version" "$IMAGE:latest"
+		fi
+
+		docker build -t "$CIRCLECI_IMAGE:$version" -f ./.circleci/images/Dockerfile .
+		if [[ "$arg" == "--latest" ]]; then
+			docker tag "$CIRCLECI_IMAGE:$version" "$CIRCLECI_IMAGE:latest"
 		fi
 	)
 }
