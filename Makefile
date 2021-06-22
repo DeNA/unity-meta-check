@@ -18,6 +18,7 @@ darwin-amd64:
 	# NOTE: Debug 用ツールなので必要になったら生成してください（生成されちゃうと Releases へあげるときに間引かないといけなくてめんどい）
 	# CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -v -o ./dist/unity-meta-check-meta-audit-darwin-amd64 ./tool/unity-meta-check-meta-audit
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -v -o ./dist/unity-meta-autofix-darwin-amd64 ./tool/unity-meta-autofix
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -v -o ./dist/gh-action-yaml-gen-darwin-amd64 ./tool/gh-action/action-yaml-gen 
 
 
 linux-amd64:
@@ -28,6 +29,7 @@ linux-amd64:
 	# NOTE: Debug 用ツールなので必要になったら生成してください（生成されちゃうと Releases へあげるときに間引かないといけなくてめんどい）
 	# CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -v -o ./dist/unity-meta-check-meta-audit-linux-amd64 ./tool/unity-meta-check-meta-audit
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -v -o ./dist/unity-meta-autofix-linux-amd64 ./tool/unity-meta-autofix
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -v -o ./dist/gh-action-yaml-gen-linux-amd64 ./tool/gh-action/action-yaml-gen 
 
 
 windows-amd64:
@@ -38,6 +40,7 @@ windows-amd64:
 	# NOTE: Debug 用ツールなので必要になったら生成してください（生成されちゃうと Releases へあげるときに間引かないといけなくてめんどい）
 	# CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -v -o ./dist/unity-meta-check-meta-audit-windows-amd64.exe ./tool/unity-meta-check-meta-audit
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -v -o ./dist/unity-meta-autofix-windows-amd64.exe ./tool/unity-meta-autofix
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -v -o ./dist/gh-action-yaml-gen-windows-amd64.exe ./tool/gh-action/action-yaml-gen 
 
 
 .PHONY: all test clean darwin-amd64 linux-amd64 windows-amd64
