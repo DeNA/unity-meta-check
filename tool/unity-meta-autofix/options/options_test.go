@@ -1,7 +1,6 @@
 package options
 
 import (
-	"fmt"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/logging"
@@ -12,134 +11,94 @@ import (
 )
 
 func TestBuild(t *testing.T) {
-	cwd, err := typedpath.Getwd()
-	if err != nil {
-		panic(err.Error())
-	}
-
-	cases := []struct {
+	cases := map[string]struct {
 		Args     []string
+		Cwd      typedpath.SlashPath
 		Expected *Options
 	}{
-		{
+		"-version": {
 			Args: []string{"-version"},
 			Expected: &Options{
 				Version: true,
 			},
 		},
-		{
-			Args: []string{"-fix-missing", "path/to/allow/autofix"},
+		"only 1 glob": {
+			Args: []string{"path/to/allow/autofix"},
+			Cwd:  "/abs",
 			Expected: &Options{
 				Version:      false,
 				LogLevel:     logging.SeverityInfo,
 				DryRun:       false,
-				FixMissing:   true,
-				FixDangling:  false,
 				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd,
+				RootDirAbs:   "/abs",
 			},
 		},
-		{
-			Args: []string{"-fix-dangling", "path/to/allow/autofix"},
-			Expected: &Options{
-				Version:      false,
-				LogLevel:     logging.SeverityInfo,
-				DryRun:       false,
-				FixMissing:   false,
-				FixDangling:  true,
-				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd,
-			},
-		},
-		{
-			Args: []string{"-fix-missing", "-fix-dangling", "path/to/allow/autofix"},
-			Expected: &Options{
-				Version:      false,
-				LogLevel:     logging.SeverityInfo,
-				DryRun:       false,
-				FixMissing:   true,
-				FixDangling:  true,
-				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd,
-			},
-		},
-		{
-			Args: []string{"-dry-run", "-fix-missing", "path/to/allow/autofix"},
+		"-dry-run": {
+			Args: []string{"-dry-run", "path/to/allow/autofix"},
+			Cwd:  "/abs",
 			Expected: &Options{
 				Version:      false,
 				LogLevel:     logging.SeverityInfo,
 				DryRun:       true,
-				FixMissing:   true,
-				FixDangling:  false,
 				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd,
+				RootDirAbs:   "/abs",
 			},
 		},
-		{
-			Args: []string{"-fix-missing", "-root-dir", string(cwd.Dir()), "path/to/allow/autofix"},
+		"-root-dir": {
+			Args: []string{"-root-dir", "/root/dir", "path/to/allow/autofix"},
 			Expected: &Options{
 				Version:      false,
 				LogLevel:     logging.SeverityInfo,
 				DryRun:       false,
-				FixMissing:   true,
-				FixDangling:  false,
 				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd.Dir(),
+				RootDirAbs:   "/root/dir",
 			},
 		},
-		{
-			Args: []string{"-fix-missing", "-debug", "path/to/allow/autofix/"},
+		"-debug": {
+			Args: []string{"-debug", "path/to/allow/autofix"},
+			Cwd:  "/abs",
 			Expected: &Options{
 				Version:      false,
 				LogLevel:     logging.SeverityDebug,
 				DryRun:       false,
-				FixMissing:   true,
-				FixDangling:  false,
 				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd,
+				RootDirAbs:   "/abs",
 			},
 		},
-		{
-			Args: []string{"-fix-missing", "-silent", "path/to/allow/autofix/"},
+		"-silent": {
+			Args: []string{"-silent", "path/to/allow/autofix"},
+			Cwd:  "/abs",
 			Expected: &Options{
 				Version:      false,
 				LogLevel:     logging.SeverityWarn,
 				DryRun:       false,
-				FixMissing:   true,
-				FixDangling:  false,
 				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd,
+				RootDirAbs:   "/abs",
 			},
 		},
-		{
-			Args: []string{"-fix-missing", "-silent", "path/to/allow/autofix/"},
-			Expected: &Options{
-				Version:      false,
-				LogLevel:     logging.SeverityWarn,
-				DryRun:       false,
-				FixMissing:   true,
-				FixDangling:  false,
-				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd,
-			},
-		},
-		{
-			Args: []string{"-fix-missing", "-debug", "-silent", "/path/to/allow/autofix"},
+		"both -debug and -silent": {
+			Args: []string{"-debug", "-silent", "path/to/allow/autofix"},
+			Cwd:  "/abs",
 			Expected: &Options{
 				Version:      false,
 				LogLevel:     logging.SeverityDebug,
 				DryRun:       false,
-				FixMissing:   true,
-				FixDangling:  false,
 				AllowedGlobs: []globs.Glob{"path/to/allow/autofix"},
-				RootDirAbs:   cwd,
+				RootDirAbs:   "/abs",
 			},
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(fmt.Sprintf("%v", c.Args), func(t *testing.T) {
-			opts, err := Build(c.Args, cli.AnyProcInout())
+	for desc, c := range cases {
+		t.Run(desc, func(t *testing.T) {
+			parse := NewParser(func(unsafeRootDir typedpath.RawPath) (typedpath.RawPath, error) {
+				if unsafeRootDir == "." {
+					return c.Cwd.ToRaw(), nil
+				}
+				return unsafeRootDir, nil
+			})
+
+			opts, err := parse(c.Args, cli.AnyProcInout())
 			if err != nil {
 				t.Errorf("want nil, got %#v", err)
 				return

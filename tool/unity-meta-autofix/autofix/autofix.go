@@ -5,22 +5,7 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/logging"
-	"github.com/DeNA/unity-meta-check/util/typedpath"
 )
-
-type Options struct {
-	RootDirAbs   typedpath.RawPath
-	RootDirRel   typedpath.RawPath
-	AllowedGlobs []globs.Glob
-}
-
-func NewOptions(rootDirAbs typedpath.RawPath, rootDirRel typedpath.RawPath, allowedGlobs []globs.Glob) *Options {
-	return &Options{
-		RootDirAbs:   rootDirAbs,
-		RootDirRel:   rootDirRel,
-		AllowedGlobs: allowedGlobs,
-	}
-}
 
 type AutoFixer func(result *checker.CheckResult, opts *Options) error
 
@@ -45,7 +30,7 @@ func NewAutoFixer(dryRun bool, detectMetaType MetaTypeDetector, createMeta MetaC
 			missingMetaAbs := opts.RootDirAbs.JoinRawPath(missingMeta.ToRaw())
 			metaType, err := detectMetaType(missingMetaAbs)
 			if err != nil {
-				logger.Info(fmt.Sprintf("generating .meta skipped because: %s", err.Error()))
+				logger.Warn(fmt.Sprintf("generating .meta skipped because: %s", err.Error()))
 				continue
 			}
 			logger.Debug(fmt.Sprintf("meta type detected: %q for %s (matched by %q)", metaType, missingMeta, matched))

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-// NOTE: It is slash separated path. Typically, Git uses the Slash Path.
+// SlashPath is slash separated path. Typically, Git uses the Slash Path.
 type SlashPath string
 
 func NewSlashPathUnsafe(path string) SlashPath {

@@ -47,6 +47,8 @@ func GetTemplate(lang Lang) (*Template, error) {
 	}
 }
 
+type TemplateFileReader func(path typedpath.RawPath) (*Template, error)
+
 func ReadTemplateFile(path typedpath.RawPath) (*Template, error) {
 	file, err := os.Open(string(path))
 	if err != nil {

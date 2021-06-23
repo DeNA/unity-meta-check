@@ -17,7 +17,7 @@ import (
 func TestNewBuilder(t *testing.T) {
 	cases := []struct {
 		Args         []string
-		IsUnityProj  bool
+		TargetType   checker.TargetType
 		RootDirAbs   typedpath.RawPath
 		IgnoredPaths []globs.Glob
 
@@ -25,7 +25,7 @@ func TestNewBuilder(t *testing.T) {
 	}{
 		{
 			Args:         []string{},
-			IsUnityProj:  true,
+			TargetType:   checker.TargetTypeIsUnityProjectRootDirectory,
 			RootDirAbs:   typedpath.NewRawPath("path", "to", "unity", "proj"),
 			IgnoredPaths: []globs.Glob{},
 			Expected: &Options{
@@ -40,7 +40,7 @@ func TestNewBuilder(t *testing.T) {
 		},
 		{
 			Args:         []string{},
-			IsUnityProj:  false,
+			TargetType:   checker.TargetTypeIsUnityProjectSubDirectory,
 			RootDirAbs:   typedpath.NewRawPath("path", "to", "unity", "proj", "sub", "dir"),
 			IgnoredPaths: []globs.Glob{},
 			Expected: &Options{
@@ -55,7 +55,7 @@ func TestNewBuilder(t *testing.T) {
 		},
 		{
 			Args:         []string{"-version"},
-			IsUnityProj:  true,
+			TargetType:   checker.TargetTypeIsUnityProjectRootDirectory,
 			RootDirAbs:   typedpath.NewRawPath("path", "to", "unity", "proj"),
 			IgnoredPaths: []globs.Glob{},
 			Expected: &Options{
@@ -64,7 +64,7 @@ func TestNewBuilder(t *testing.T) {
 		},
 		{
 			Args:         []string{"-debug"},
-			IsUnityProj:  true,
+			TargetType:   checker.TargetTypeIsUnityProjectRootDirectory,
 			RootDirAbs:   typedpath.NewRawPath("path", "to", "unity", "proj"),
 			IgnoredPaths: []globs.Glob{},
 			Expected: &Options{
@@ -79,7 +79,7 @@ func TestNewBuilder(t *testing.T) {
 		},
 		{
 			Args:         []string{"-silent"},
-			IsUnityProj:  true,
+			TargetType:   checker.TargetTypeIsUnityProjectRootDirectory,
 			RootDirAbs:   typedpath.NewRawPath("path", "to", "unity", "proj"),
 			IgnoredPaths: []globs.Glob{},
 			Expected: &Options{
@@ -94,7 +94,7 @@ func TestNewBuilder(t *testing.T) {
 		},
 		{
 			Args:         []string{"-silent", "-debug"},
-			IsUnityProj:  true,
+			TargetType:   checker.TargetTypeIsUnityProjectRootDirectory,
 			RootDirAbs:   typedpath.NewRawPath("path", "to", "unity", "proj"),
 			IgnoredPaths: []globs.Glob{},
 			Expected: &Options{
@@ -114,21 +114,26 @@ func TestNewBuilder(t *testing.T) {
 			stdin := strings.NewReader("")
 			stdout := testutil.SpyWriteCloser(nil)
 			stderr := testutil.SpyWriteCloser(nil)
+			spyLogger := logging.SpyLogger()
 			procInout := cli.ProcessInout{Stdin: stdin, Stdout: stdout, Stderr: stderr}
 
 			buildOptions := NewBuilder(
-				StubRootDirDetector(c.RootDirAbs, nil),
-				StubUnityProjectDetector(c.IsUnityProj, nil),
+				StubRootDirCompletion(c.RootDirAbs, nil),
+				StubUnityProjectDetector(c.TargetType, nil),
 				StubIgnoredPathBuilder(c.IgnoredPaths, nil),
+				StubRootDirValidator(c.RootDirAbs, nil),
+				spyLogger,
 			)
 
 			actual, err := buildOptions(c.Args, procInout)
 			if err != nil {
+				t.Log(spyLogger.Logs.String())
 				t.Errorf("want nil, got %#v", err)
 				return
 			}
 
 			if !reflect.DeepEqual(actual, c.Expected) {
+				t.Log(spyLogger.Logs.String())
 				t.Error(cmp.Diff(c.Expected, actual))
 				return
 			}

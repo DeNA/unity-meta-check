@@ -12,18 +12,18 @@ import (
 	"strings"
 )
 
-type PullRequestCommentSender func(owner string, repo string, prNumber uint, comment string) error
+type PullRequestCommentSender func(githubEndpoint APIEndpoint, token Token, owner Owner, repo Repo, pullNumber PullNumber, comment string) error
 
 type PullRequestComment struct {
 	Body string `json:"body"`
 }
 
-func NewPullRequestCommentSender(githubEndpoint *url.URL, token string, send HttpFunc, logger logging.Logger) PullRequestCommentSender {
-	return func(owner string, repo string, prNumber uint, comment string) error {
+func NewPullRequestCommentSender(send HttpFunc, logger logging.Logger) PullRequestCommentSender {
+	return func(githubEndpoint APIEndpoint, token Token, owner Owner, repo Repo, pullNumber PullNumber, comment string) error {
 		apiUrl := &url.URL{
 			Scheme: githubEndpoint.Scheme,
 			Host:   githubEndpoint.Host,
-			Path:   path.Join(githubEndpoint.Path, "repos", owner, repo, "issues", fmt.Sprintf("%d", prNumber), "comments"),
+			Path:   path.Join(githubEndpoint.Path, "repos", string(owner), string(repo), "issues", fmt.Sprintf("%d", pullNumber), "comments"),
 		}
 		logger.Debug(fmt.Sprintf("url: %s", apiUrl.String()))
 

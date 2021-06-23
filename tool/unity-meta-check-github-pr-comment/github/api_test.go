@@ -16,14 +16,14 @@ func TestNewPullRequestCommentSender(t *testing.T) {
 		return
 	}
 
-	endpoint, err := url.Parse("https://api.github.com/")
+	endpoint, err := url.Parse("https://api.github.com")
 	if err != nil {
 		t.Errorf("want nil, got %#v", err)
 		return
 	}
 
-	send := NewPullRequestCommentSender(endpoint, token, NewHttp(), spyLogger)
-	if err := send("dena", "unity-meta-check-playground", 1, "TEST FROM unity-meta-check-github-pr-comment"); err != nil {
+	send := NewPullRequestCommentSender(NewHttp(), spyLogger)
+	if err := send(endpoint, Token(token), "dena", "unity-meta-check-playground", 1, "TEST FROM unity-meta-check-github-pr-comment"); err != nil {
 		t.Log(spyLogger.Logs.String())
 		t.Errorf("want nil, got %#v", err)
 		return

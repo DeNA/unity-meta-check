@@ -24,7 +24,7 @@ func TestCheck(t *testing.T) {
 		TargetType: TargetTypeIsUnityProjectRootDirectory,
 	}
 
-	checker := newChecker(strategy, spyLogger)
+	checker := newCheckerByStrategy(strategy, spyLogger)
 	actual, err := checker("/path/to/Project", opts)
 
 	if err != nil {

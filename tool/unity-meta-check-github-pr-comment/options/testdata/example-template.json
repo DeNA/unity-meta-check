@@ -1,0 +1,8 @@
+{
+  "success": "SUCCESS",
+  "failure": "FAILURE",
+  "header_status": "HEADER_STATUS",
+  "header_file_path": "HEADER_FILE_PATH",
+  "status_missing": "STATUS_MISSING",
+  "status_dangling": "STATUS_DANGLING"
+}

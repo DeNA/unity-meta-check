@@ -1,11 +1,17 @@
 package cli
 
 func AnyEnv() Env {
-	return StubEnv("ANY_ENV")
+	return ConstEnv("ANY_ENV")
 }
 
-func StubEnv(result string) Env {
+func ConstEnv(result string) Env {
 	return func(string) string {
 		return result
+	}
+}
+
+func StubEnv(m map[string]string) Env {
+	return func(n string) string {
+		return m[n]
 	}
 }

@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/DeNA/unity-meta-check/git"
 	"github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/report"
 	"github.com/DeNA/unity-meta-check/resultfilter"
+	"github.com/DeNA/unity-meta-check/unity"
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/logging"
@@ -48,14 +50,21 @@ func NewMain() cli.Command {
 
 		logger := logging.NewLogger(opts.LogLevel, procInout.Stderr)
 
-		result, err := checker.Check(
+		check := checker.NewChecker(
+			checker.NewStrategySelector(
+				unity.NewFindPackages(logger),
+				git.NewLsFiles(logger),
+				logger,
+			),
+			logger,
+		)
+		result, err := check(
 			opts.RootDirAbs,
 			&checker.Options{
-				IgnoreCase: opts.IgnoreCase,
+				IgnoreCase:                opts.IgnoreCase,
 				IgnoreSubmodulesAndNested: opts.IgnoreSubmodulesAndNested,
-				TargetType: opts.TargetType,
+				TargetType:                opts.TargetType,
 			},
-			logger,
 		)
 		if err != nil {
 			_, _ = fmt.Fprintln(procInout.Stderr, err.Error())

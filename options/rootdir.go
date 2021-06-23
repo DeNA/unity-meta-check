@@ -4,46 +4,45 @@ import (
 	"fmt"
 	"github.com/DeNA/unity-meta-check/git"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
-	"os"
+	"github.com/pkg/errors"
 	"path/filepath"
 )
 
-type RootDirDetector func(nonFlaggedArgs []string) (typedpath.RawPath, error)
+type RootDirCompletion func() (typedpath.RawPath, error)
 
-func NewRootDirDetector(gitRevParse git.RevParse, logger logging.Logger) RootDirDetector {
-	return func(nonFlaggedArgs []string) (typedpath.RawPath, error) {
-		var rootDir string
-		if len(nonFlaggedArgs) == 0 {
-			assumedRootDir, err := gitRevParse(".", "--show-toplevel")
-			if err == nil {
-				rootDir = assumedRootDir
-				logger.Info(fmt.Sprintf("rootDir not specified, so assumed by $(git rev-parse --show-toplevel): %s", rootDir))
-			} else {
-				// NOTE: This is an fallback
-				rootDir = "."
-				logger.Info(fmt.Sprintf("rootDir not specified and seems not in any git repositories, so using the fallback value: %s", rootDir))
-			}
-		} else if len(nonFlaggedArgs) == 1 {
-			rootDir = nonFlaggedArgs[0]
-			logger.Info(fmt.Sprintf("rootDir specified by arguments: %s", rootDir))
-		} else {
-			return "", fmt.Errorf("must be only 1 path, but given %d paths", len(nonFlaggedArgs))
+func NewRootDirCompletion(gitRevParse git.RevParse, logger logging.Logger) RootDirCompletion {
+	return func() (typedpath.RawPath, error) {
+		assumedRootDir, err := gitRevParse(".", "--show-toplevel")
+		if err != nil {
+			return "", errors.Wrap(err, "rootDir not specified and seems not being in any git repositories")
 		}
 
-		rootDirAbs, err := filepath.Abs(rootDir)
+		logger.Debug(fmt.Sprintf("rootDir not specified, so assumed by $(git rev-parse --show-toplevel): %q", assumedRootDir))
+		return typedpath.NewRawPathUnsafe(assumedRootDir), nil
+	}
+}
+
+type RootDirAbsValidator func(unsafeRootDir typedpath.RawPath) (typedpath.RawPath, error)
+
+func NewRootDirValidator(isDir ostestable.IsDir) RootDirAbsValidator {
+	return func(unsafeRootDir typedpath.RawPath) (typedpath.RawPath, error) {
+		rootDirAbsStr, err := filepath.Abs(string(unsafeRootDir))
 		if err != nil {
 			return "", err
 		}
 
-		stat, err := os.Stat(rootDirAbs)
+		rootDirAbs := typedpath.NewRawPathUnsafe(rootDirAbsStr)
+
+		ok, err := isDir(rootDirAbs)
 		if err != nil {
-			return "", err
+			return "", errors.Wrapf(err, "cannot check directory: %q", rootDirAbs)
 		}
-		if !stat.IsDir() {
-			return "", fmt.Errorf("not a directory: %q", rootDirAbs)
+		if !ok {
+			return "", fmt.Errorf("root directory must be a directory: %s", rootDirAbsStr)
 		}
 
-		return typedpath.RawPath(rootDirAbs), err
+		return rootDirAbs, nil
 	}
 }

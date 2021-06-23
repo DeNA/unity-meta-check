@@ -1,9 +1,9 @@
 package options
 
 import (
-	"errors"
 	"flag"
 	"fmt"
+	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/github"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/l10n"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/markdown"
 	"github.com/DeNA/unity-meta-check/unity/checker"
@@ -11,18 +11,18 @@ import (
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/prefix"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
-	"net/url"
+	"github.com/pkg/errors"
 )
 
 type Options struct {
 	Version       bool
 	LogLevel      logging.Severity
 	Tmpl          *l10n.Template
-	Token         string
-	Owner         string
-	Repo          string
-	PullNumber    uint
-	APIEndpoint   *url.URL
+	Token         github.Token
+	Owner         github.Owner
+	Repo          github.Repo
+	PullNumber    github.PullNumber
+	APIEndpoint   github.APIEndpoint
 	SendIfSuccess bool
 }
 
@@ -98,17 +98,18 @@ or:
 
 		_, _ = fmt.Fprintln(procInout.Stderr, "")
 	}
+	var unsafePullNumber int
 	var debug, silent, noSendSuccess bool
-	var lang, tmplPath, apiEndpointString string
+	var lang, tmplPath, unsafeAPIEndpoint, unsafeOwner, unsafeRepo string
 	flags.BoolVar(&opts.Version, "version", false, "print version")
 	flags.BoolVar(&debug, "debug", false, "set log level to DEBUG (default INFO)")
 	flags.BoolVar(&silent, "silent", false, "set log level to WARN (default INFO)")
 	flags.StringVar(&lang, "lang", "en", "language code (available: en, ja)")
 	flags.StringVar(&tmplPath, "template-file", "", "custom template file")
-	flags.StringVar(&opts.Owner, "owner", "", "owner of the GitHub repository")
-	flags.StringVar(&opts.Repo, "repo", "", "name of the GitHub repository")
-	flags.UintVar(&opts.PullNumber, "pull", 0, "pull request number")
-	flags.StringVar(&apiEndpointString, "api-endpoint", "https://api.github.com", "GitHub API endpoint URL (like https://api.github.com or https://github.example.com/api/v3)")
+	flags.StringVar(&unsafeOwner, "owner", "", "owner of the GitHub repository")
+	flags.StringVar(&unsafeRepo, "repo", "", "name of the GitHub repository")
+	flags.IntVar(&unsafePullNumber, "pull", 0, "pull request number")
+	flags.StringVar(&unsafeAPIEndpoint, "api-endpoint", "https://api.github.com", "GitHub API endpoint URL (like https://api.github.com or https://github.example.com/api/v3)")
 	flags.BoolVar(&noSendSuccess, "no-send-success", false, "do not send a comment if no missing/dangling .meta found")
 
 	if err := flags.Parse(args); err != nil {
@@ -121,17 +122,31 @@ or:
 
 	opts.LogLevel = cli.GetLogLevel(debug, silent)
 
-	token := env("GITHUB_TOKEN")
-	if token == "" {
-		return nil, errors.New("must specify github token via an environment var as GITHUB_TOKEN")
+	token, err := github.ValidateToken(env("GITHUB_TOKEN"))
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid GITHUB_TOKEN: %s")
 	}
 	opts.Token = token
 
-	if opts.PullNumber == 0 {
-		return nil, errors.New("must specify pull number")
+	owner, err := github.ValidateOwner(unsafeOwner)
+	if err != nil {
+		return nil, err
 	}
+	opts.Owner = owner
 
-	apiEndpoint, err := url.Parse(apiEndpointString)
+	repo, err := github.ValidateRepo(unsafeRepo)
+	if err != nil {
+		return nil, err
+	}
+	opts.Repo = repo
+
+	pullNumber, err := github.ValidatePullNumber(unsafePullNumber)
+	if err != nil {
+		return nil, err
+	}
+	opts.PullNumber = pullNumber
+
+	apiEndpoint, err := github.ValidateAPIEndpoint(unsafeAPIEndpoint)
 	if err != nil {
 		return nil, err
 	}

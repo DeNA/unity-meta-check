@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// NOTE: It is OS depended path. This style is for directly handling file systems.
+// RawPath is OS depended path. This style is for directly handling file systems.
 type RawPath string
 
 func NewRawPath(basenames ...BaseName) RawPath {

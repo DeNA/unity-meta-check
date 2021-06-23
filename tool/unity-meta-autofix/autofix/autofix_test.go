@@ -77,11 +77,11 @@ func TestNewAutoFixer(t *testing.T) {
 
 			autofix := NewAutoFixer(c.DryRun, metaTypeDetector, metaCreator, metaRemover, spyLogger)
 
-			err := autofix(c.Target, NewOptions(
-				rootDirAbs(c.RootDirRel),
-				c.RootDirRel,
-				c.AllowedGlobs,
-			))
+			err := autofix(c.Target, &Options{
+				RootDirAbs:   rootDirAbs(c.RootDirRel),
+				RootDirRel:   c.RootDirRel,
+				AllowedGlobs: c.AllowedGlobs,
+			})
 
 			if c.ExpectedErr {
 				if err == nil {
