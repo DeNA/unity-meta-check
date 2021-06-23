@@ -59,7 +59,10 @@ func (b BoolInputDef) Required() bool {
 }
 
 func (b BoolInputDef) DefaultValueAsYAML() string {
-	return fmt.Sprintf("%t", b.defaultValue)
+	if b.defaultValue {
+		return `"true"`
+	}
+	return `"false"`
 }
 
 type IntInputDef struct {
@@ -82,5 +85,5 @@ func (u IntInputDef) Required() bool {
 }
 
 func (u IntInputDef) DefaultValueAsYAML() string {
-	return fmt.Sprintf("%d", u.defaultValue)
+	return fmt.Sprintf("%q", fmt.Sprintf("%d", u.defaultValue))
 }

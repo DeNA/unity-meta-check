@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"testing/quick"
 )
 
 func TestInputDefsCoverInput(t *testing.T) {
@@ -129,5 +130,25 @@ func TestStringifyInt_UnmarshalJSON(t *testing.T) {
 				t.Errorf("want %d, got %d", c.Expected, actual)
 			}
 		})
+	}
+}
+
+func TestMarshalUnmarshal(t *testing.T) {
+	if err := quick.Check(func(i1 Inputs) bool {
+		j, err := json.Marshal(i1)
+		if err != nil {
+			t.Log(err)
+			return false
+		}
+
+		var i2 Inputs
+		if err := json.Unmarshal(j, &i2); err != nil {
+			t.Log(err)
+			return false
+		}
+
+		return reflect.DeepEqual(i1, i2)
+	}, nil); err != nil {
+		t.Error(err)
 	}
 }

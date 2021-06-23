@@ -4,86 +4,97 @@
 name: "Unity meta files check"
 author: "DeNA Co., Ltd."
 description: "Check missing/dangling meta files"
+
 inputs:
   "log_level":
-    description: "log level for unity-meta-check toolchains (available: ERROR/WARN/INFO/DEBUG)"
+    description: "Log level for unity-meta-check toolchains (available: ERROR/WARN/INFO/DEBUG)"
+    required: false
     default: "INFO"
 
   "target_type":
-    description: "target type for unity-meta-check (available: auto-detect/unity-project/unity-project-sub-dir/upm-package)"
+    description: "Target type for unity-meta-check (available: auto-detect/unity-project/unity-project-sub-dir/upm-package)"
+    required: false
     default: "auto-detect"
 
   "ignore_dangling":
-    description: "ignore dangling .meta"
-    default: false
+    description: "Ignore dangling .meta"
+    required: false
+    default: "false"
 
   "ignore_case":
-    description: "do not treat case of file paths"
-    default: false
+    description: "Do not treat case of file paths"
+    required: false
+    default: "false"
 
   "ignore_submodules_and_nested":
-    description: "ignore git submodules and nesting repositories (note: this is RECOMMENDED but not enabled by default because it can cause to miss problems in submodules or nesting repositories)"
-    default: false
+    description: "Ignore git submodules and nesting repositories (note: this is RECOMMENDED but not enabled by default because it can cause to miss problems in submodules or nesting repositories)"
+    required: false
+    default: "false"
 
   "ignored_file_path":
-    description: "path to .meta-check-ignore"
-    default: ".meta-check-ignore"
+    description: "Path to .meta-check-ignore (note: keep empty if .meta-check-ignore does not exist)"
+    required: false
+    default: ""
 
   "enable_autofix":
-    description: "enable autofix (note: it can repair very limited file types)"
-    default: false
-
-  "autofix_missing":
-    description: "fix missing .meta"
-    default: true
-
-  "autofix_dangling":
-    description: "fix dangling .meta"
-    default: true
+    description: "Enable autofix (note: it can repair very limited file types)"
+    required: false
+    default: "false"
 
   "autofix_globs":
-    description: "glob match directories to where to allow do autofix (note: required if enable_autofix is true)"
+    description: "Glob match directories to where to allow do autofix (note: required if enable_autofix is true)"
+    required: false
     default: ""
 
   "enable_junit":
-    description: "enable JUnit-style reporting"
-    default: false
+    description: "Enable JUnit-style reporting"
+    required: false
+    default: "false"
 
   "junit_xml_path":
-    description: "file path for generated JUnit test reports (note: required if enable_junit is true)"
+    description: "File path for generated JUnit test reports (note: required if enable_junit is true)"
+    required: false
     default: ""
 
   "enable_pr_comment":
-    description: "enable reporting via GitHub Pull Request Comments"
-    default: false
+    description: "Enable reporting via GitHub Pull Request Comments"
+    required: false
+    default: "false"
 
   "pr_comment_lang":
-    description: "language code for GitHub Pull Request Comments (available: en/ja, note: cannot specify both lang and pr_comment_tmpl_file)"
-    default: false
+    description: "Language code for GitHub Pull Request Comments (available: en/ja, note: cannot specify both lang and pr_comment_tmpl_file)"
+    required: false
+    default: "false"
 
   "pr_comment_tmpl_file":
-    description: "file path to custom template file for GitHub Pull Request Comments (note: cannot specify both lang and pr_comment_tmpl_file)"
+    description: "File path to custom template file for GitHub Pull Request Comments (note: cannot specify both lang and pr_comment_tmpl_file)"
+    required: false
     default: ""
 
   "pr_comment_owner":
-    description: "owner of the GitHub repository (note: required if enable_pr_comment is true)"
+    description: "Owner of the GitHub repository (note: required if enable_pr_comment is true)"
+    required: false
     default: ""
 
   "pr_comment_repo":
-    description: "name of the GitHub repository (note: required if enable_pr_comment is true)"
+    description: "Name of the GitHub repository (note: required if enable_pr_comment is true)"
+    required: false
     default: ""
 
   "pr_comment_pull":
-    description: "pull request number (note: required if enable_pr_comment is true)"
-    default: 0
+    description: "Pull request number (note: required if enable_pr_comment is true)"
+    required: false
+    default: "0"
 
   "pr_comment_api_endpoint":
     description: "GitHub API endpoint URL (example: https://api.github.com or https://github.example.com/api/v3, note: required if enable_pr_comment is true)"
+    required: false
     default: "https://api.github.com"
 
-  "pr_comment_no_send_success":
-    description: "do not send a comment if no missing/dangling .meta found"
-    default: false
+  "pr_comment_send_success":
+    description: "Send a comment if no missing/dangling .meta found"
+    required: false
+    default: "false"
 
 runs:
   using: "docker"
@@ -92,6 +103,7 @@ runs:
     - "-inputs-json"
     - "{{ toJSON(github.inputs) }}"
     - "{{ github.workspace }}"
-  branding:
-    icon: "check"
-    color: "blue"
+
+branding:
+  icon: "check"
+  color: "blue"

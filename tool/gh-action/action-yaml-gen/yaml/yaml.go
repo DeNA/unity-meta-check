@@ -19,6 +19,7 @@ func WriteTo(w io.Writer) (i int64, err error) {
 name: %q
 author: %q
 description: %q
+
 `[1:], metadata.Name, metadata.Author, metadata.Description)
 	i += int64(j)
 	if err != nil {
@@ -37,19 +38,19 @@ description: %q
 		return
 	}
 
-	j, err = fmt.Fprintln(w, "  branding:")
+	j, err = fmt.Fprintln(w, "branding:")
 	i += int64(j)
 	if err != nil {
 		return
 	}
 
-	j, err = fmt.Fprintf(w, "    icon: %q\n", metadata.BrandingIcon)
+	j, err = fmt.Fprintf(w, "  icon: %q\n", metadata.BrandingIcon)
 	i += int64(j)
 	if err != nil {
 		return
 	}
 
-	j, err = fmt.Fprintf(w, "    color: %q\n", metadata.BrandingColor)
+	j, err = fmt.Fprintf(w, "  color: %q\n", metadata.BrandingColor)
 	i += int64(j)
 	if err != nil {
 		return
@@ -84,6 +85,7 @@ func WriteInputsAsGHActionYAML(w io.Writer, defs []InputDef) (i int64, err error
 			j, err = fmt.Fprintf(w, `
   %q:
     description: %q
+    required: false
     default: %s
 
 `[1:], def.Name(), def.Desc(), def.DefaultValueAsYAML())
@@ -141,6 +143,12 @@ runs:
 				return
 			}
 		}
+	}
+
+	j, err = fmt.Fprint(w, "\n")
+	i += int64(j)
+	if err != nil {
+		return
 	}
 
 	return
