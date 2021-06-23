@@ -3,6 +3,7 @@ package logging
 import (
 	"fmt"
 	"io"
+	"strings"
 )
 
 type Severity int
@@ -67,7 +68,7 @@ func (logger *severityLogger) Error(message string) {
 
 func (logger *severityLogger) Log(severity Severity, message string) {
 	if logger.severity <= severity {
-		_, err := fmt.Fprintln(logger.writer, message)
+		_, err := fmt.Fprintf(logger.writer, "%s: %s\n", strings.ToLower(severity.String()), message)
 
 		if err != nil {
 			panic(err)

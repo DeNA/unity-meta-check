@@ -2,8 +2,6 @@ package checker
 
 import (
 	"github.com/DeNA/unity-meta-check/filecollector"
-	"github.com/DeNA/unity-meta-check/git"
-	"github.com/DeNA/unity-meta-check/unity"
 	"github.com/DeNA/unity-meta-check/util/errutil"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
@@ -12,18 +10,19 @@ import (
 
 type Checker func(rootDirAbs typedpath.RawPath, opts *Options) (*CheckResult, error)
 
-func Check(rootDirAbs typedpath.RawPath, opts *Options, logger logging.Logger) (*CheckResult, error) {
-	selectStrategy := NewStrategySelector(unity.NewFindPackages(logger), git.NewLsFiles(logger), logger)
-	strategy, err := selectStrategy(rootDirAbs, opts)
-	if err != nil {
-		return nil, err
-	}
+func NewChecker(selectStrategy StrategySelector, logger logging.Logger) Checker {
+	return func(rootDirAbs typedpath.RawPath, opts *Options) (*CheckResult, error) {
+		strategy, err := selectStrategy(rootDirAbs, opts)
+		if err != nil {
+			return nil, err
+		}
 
-	check := newChecker(strategy, logger)
-	return check(rootDirAbs, opts)
+		check := newCheckerByStrategy(strategy, logger)
+		return check(rootDirAbs, opts)
+	}
 }
 
-func newChecker(strategy Strategy, logger logging.Logger) Checker {
+func newCheckerByStrategy(strategy Strategy, logger logging.Logger) Checker {
 	return func(rootDirAbs typedpath.RawPath, opts *Options) (*CheckResult, error) {
 		ch := make(chan typedpath.SlashPath)
 

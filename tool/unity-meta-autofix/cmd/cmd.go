@@ -3,6 +3,7 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	options2 "github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/report"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-autofix/autofix"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-autofix/options"
@@ -10,13 +11,13 @@ import (
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/ostestable"
-	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/DeNA/unity-meta-check/version"
 )
 
 func NewMain() cli.Command {
 	return func(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus {
-		opts, err := options.Build(args, procInout)
+		parseOpts := options.NewParser(options2.NewRootDirValidator(ostestable.NewIsDir()))
+		opts, err := parseOpts(args, procInout)
 		if err != nil {
 			if err != flag.ErrHelp {
 				_, _ = fmt.Fprintln(procInout.Stderr, err.Error())
@@ -33,16 +34,6 @@ func NewMain() cli.Command {
 		result := parse(procInout.Stdin)
 
 		logger := logging.NewLogger(opts.LogLevel, procInout.Stderr)
-		cwdAbs, err := typedpath.Getwd()
-		if err != nil {
-			_, _ = fmt.Fprintln(procInout.Stderr, err.Error())
-			return cli.ExitAbnormal
-		}
-		rootDirRel, err := cwdAbs.Rel(opts.RootDirAbs)
-		if err != nil {
-			_, _ = fmt.Fprintln(procInout.Stderr, err.Error())
-			return cli.ExitAbnormal
-		}
 
 		autofixFunc := autofix.NewAutoFixer(
 			opts.DryRun,
@@ -51,10 +42,16 @@ func NewMain() cli.Command {
 			autofix.NewMetaRemover(opts.DryRun),
 			logger,
 		)
-		autofixOpts := autofix.NewOptions(opts.RootDirAbs, rootDirRel, opts.AllowedGlobs)
-		if err := autofixFunc(result, autofixOpts)
-			err != nil {
-			_, _ = fmt.Fprintln(procInout.Stderr, err.Error())
+
+		buildOpts := autofix.NewOptionsBuilder(ostestable.NewGetwd())
+		autofixOpts, err := buildOpts(opts.RootDirAbs, opts.AllowedGlobs)
+		if err != nil {
+			logger.Error(err.Error())
+			return cli.ExitNormal
+		}
+
+		if err := autofixFunc(result, autofixOpts); err != nil {
+			logger.Error(err.Error())
 			return cli.ExitAbnormal
 		}
 

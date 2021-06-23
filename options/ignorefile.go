@@ -10,11 +10,11 @@ import (
 
 const IgnoreFileBasename typedpath.BaseName = ".meta-check-ignore"
 
-type IgnoredPathsBuilder func(ignoreFilePath typedpath.RawPath, rootDirAbs typedpath.RawPath) ([]globs.Glob, error)
+type IgnoredGlobsBuilder func(ignoreFilePath typedpath.RawPath, rootDirAbs typedpath.RawPath) ([]globs.Glob, error)
 
-func NewIgnoredPathsBuilder(logger logging.Logger) IgnoredPathsBuilder {
+func NewIgnoredGlobsBuilder(logger logging.Logger) IgnoredGlobsBuilder {
 	return func(ignoreFilePath typedpath.RawPath, rootDirAbs typedpath.RawPath) ([]globs.Glob, error) {
-		ignoredPaths, err := ignore.ReadFile(getIgnoreFilePath(ignoreFilePath, rootDirAbs))
+		ignoredGlobs, err := ignore.ReadFile(getIgnoreFilePath(ignoreFilePath, rootDirAbs))
 		if err != nil {
 			// NOTE: If it is a default value, missing .meta-check-ignore is allowed because it is optional.
 			//       Otherwise, treat as an error if specified ignoreFilePath is missing.
@@ -22,9 +22,9 @@ func NewIgnoredPathsBuilder(logger logging.Logger) IgnoredPathsBuilder {
 				return nil, err
 			}
 			logger.Info("no .meta-check-ignore, so ignored paths are empty")
-			ignoredPaths = []globs.Glob{}
+			ignoredGlobs = []globs.Glob{}
 		}
-		return ignoredPaths, nil
+		return ignoredGlobs, nil
 	}
 }
 
