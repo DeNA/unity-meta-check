@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
+	"github.com/pkg/errors"
 	"os"
 	"strings"
 )
@@ -65,8 +66,7 @@ func NewFindPackages(logger logging.Logger) FindPackages {
 			localPkgAbsRawPath := packagesDirAbsPath.JoinRawPath(typedpath.SlashPath(value[LocalPkgPrefixLen:]).ToRaw())
 			localPkgRelRawPath, err := rootDirAbs.Rel(localPkgAbsRawPath)
 			if err != nil {
-				logger.Error(fmt.Sprintf("cannot detect Local package location: %q", err.Error()))
-				return nil, err
+				return nil, errors.Wrapf(err, "cannot detect Local package location")
 			}
 			if _, err := os.Stat(string(localPkgAbsRawPath)); err != nil {
 				if os.IsNotExist(err) {
