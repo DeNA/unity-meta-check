@@ -39,6 +39,8 @@ func NewMain() cli.Command {
 		if err := send(result, &github.Options{
 			Tmpl:          opts.Tmpl,
 			SendIfSuccess: opts.SendIfSuccess,
+			Token:         opts.Token,
+			APIEndpoint:   opts.APIEndpoint,
 			Owner:         opts.Owner,
 			Repo:          opts.Repo,
 			PullNumber:    opts.PullNumber,

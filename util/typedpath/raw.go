@@ -17,6 +17,10 @@ func NewRawPath(basenames ...BaseName) RawPath {
 	return RawPath(filepath.Join(elements...))
 }
 
+func NewRootRawPath(basenames ...BaseName) RawPath {
+	return NewRawPath(append([]BaseName{BaseName([]byte{os.PathSeparator})}, basenames...)...)
+}
+
 func NewRawPathUnsafe(path string) RawPath {
 	return RawPath(path)
 }

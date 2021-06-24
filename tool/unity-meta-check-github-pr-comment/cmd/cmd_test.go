@@ -1,17 +1,15 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/testutil"
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestValid(t *testing.T) {
-	testEnv, err := getTestEnv()
+	testEnv, err := testutil.GetTestEnv()
 	if err != nil {
 		t.Log(err.Error())
 		t.Skip("no environment variables for tests")
@@ -53,7 +51,7 @@ func TestValid(t *testing.T) {
 }
 
 func TestInvalid(t *testing.T) {
-	testEnv, err := getTestEnv()
+	testEnv, err := testutil.GetTestEnv()
 	if err != nil {
 		t.Log(err.Error())
 		t.Skip("no environment variables for tests")
@@ -114,47 +112,4 @@ func TestVersion(t *testing.T) {
 		t.Errorf("want %#v, got %#v", expected, actual)
 		return
 	}
-}
-
-type testEnv struct {
-	ApiEndpoint string
-	Owner       string
-	Repo        string
-	Pull        string
-	Token       string
-}
-
-func getTestEnv() (*testEnv, error) {
-	apiEndpoint := os.Getenv("UNITY_META_CHECK_GITHUB_API_ENDPOINT")
-	if apiEndpoint == "" {
-		return nil, errors.New("missing UNITY_META_CHECK_GITHUB_API_ENDPOINT")
-	}
-
-	owner := os.Getenv("UNITY_META_CHECK_GITHUB_OWNER")
-	if owner == "" {
-		return nil, errors.New("missing UNITY_META_CHECK_GITHUB_OWNER")
-	}
-
-	repo := os.Getenv("UNITY_META_CHECK_GITHUB_REPO")
-	if repo == "" {
-		return nil, errors.New("missing UNITY_META_CHECK_GITHUB_REPO")
-	}
-
-	pull := os.Getenv("UNITY_META_CHECK_GITHUB_PULL_NUMBER")
-	if pull == "" {
-		return nil, errors.New("missing UNITY_META_CHECK_GITHUB_PULL_NUMBER")
-	}
-
-	token := os.Getenv("UNITY_META_CHECK_GITHUB_TOKEN")
-	if token == "" {
-		return nil, errors.New("missing UNITY_META_CHECK_GITHUB_TOKEN")
-	}
-
-	return &testEnv{
-		apiEndpoint,
-		owner,
-		repo,
-		pull,
-		token,
-	}, nil
 }

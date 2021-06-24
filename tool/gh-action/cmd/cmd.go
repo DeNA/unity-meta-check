@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/DeNA/unity-meta-check/git"
-	umc "github.com/DeNA/unity-meta-check/options"
+	common "github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/resultfilter"
 	"github.com/DeNA/unity-meta-check/tool/gh-action/options"
 	"github.com/DeNA/unity-meta-check/tool/gh-action/runner"
@@ -22,7 +22,7 @@ import (
 )
 
 func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus {
-	parse := options.NewParser(umc.NewRootDirValidator(ostestable.NewIsDir()))
+	parse := options.NewParser(common.NewRootDirValidator(ostestable.NewIsDir()))
 
 	opts, err := parse(args, procInout, env)
 	if err != nil {
@@ -32,16 +32,16 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 		return cli.ExitAbnormal
 	}
 
+	logger := logging.NewLogger(logging.MustParseSeverity(opts.UnsafeInputs.LogLevel), procInout.Stderr)
+
 	if opts.Version {
 		_, _ = fmt.Fprintln(procInout.Stdout, version.Version)
 		return cli.ExitNormal
 	}
 
-	logger := logging.NewLogger(opts.LogLevel, procInout.Stderr)
-
 	validate := runner.NewValidateFunc(
-		umc.NewUnityProjectDetector(logger),
-		umc.NewIgnoredGlobsBuilder(logger),
+		common.NewUnityProjectDetector(logger),
+		common.NewIgnoredGlobsBuilder(logger),
 		autofix.NewOptionsBuilder(ostestable.NewGetwd()),
 		l10n.ReadTemplateFile,
 	)
