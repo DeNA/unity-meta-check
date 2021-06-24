@@ -61,7 +61,7 @@ func NewValidateFunc(
 			TargetType:                targetType,
 		}
 
-		ignoredGlobs, err := buildIgnoredGlobs(i.IgnoredFilePath.ToRaw(), rootDirAbs)
+		ignoredGlobs, err := buildIgnoredGlobs(i.IgnoredFilePath, rootDirAbs)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +74,7 @@ func NewValidateFunc(
 
 		var junitPath typedpath.RawPath
 		if i.EnableJUnit {
-			junitPath = i.JUnitXMLPath.ToRaw()
+			junitPath = i.JUnitXMLPath
 		}
 
 		var prcommentOps *prcomment.Options
@@ -86,7 +86,7 @@ func NewValidateFunc(
 					return nil, err
 				}
 			} else {
-				tmpl, err = readTmplFile(i.PRCommentTmplFilePath.ToRaw())
+				tmpl, err = readTmplFile(i.PRCommentTmplFilePath)
 				if err != nil {
 					return nil, err
 				}
