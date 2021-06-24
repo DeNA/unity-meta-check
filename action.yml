@@ -101,8 +101,8 @@ runs:
   image: "docker://ghcr.io/dena/unity-meta-check/unity-meta-check-gh-action:3.0.0-dev1"
   args:
     - "-inputs-json"
-    - "{{ toJSON(github.inputs) }}"
-    - "{{ github.workspace }}"
+    - "${{ toJSON(github.inputs) }}"
+    - "${{ github.workspace }}"
 
 branding:
   icon: "check"
