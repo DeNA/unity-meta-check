@@ -11,6 +11,9 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
+	"github.com/pkg/errors"
+	"net/url"
+	"strings"
 )
 
 type Options struct {
@@ -32,6 +35,7 @@ func NewValidateFunc(
 	buildIgnoredGlobs options.IgnoredGlobsBuilder,
 	buildAutofixOpts autofix.OptionsBuilder,
 	readTmplFile l10n.TemplateFileReader,
+	readEventPayload inputs.ReadEventPayloadFunc,
 ) Validator {
 	return func(rootDirAbs typedpath.RawPath, i inputs.Inputs, token prcomment.Token) (*Options, error) {
 		inputTargetType, err := inputs.ValidateTargetType(i.TargetType)
@@ -95,24 +99,19 @@ func NewValidateFunc(
 				}
 			}
 
-			owner, err := prcomment.ValidateOwner(i.PRCommentOwner)
+			eventPayload, err := readEventPayload(i.PRCommentEventPath)
 			if err != nil {
 				return nil, err
 			}
 
-			repo, err := prcomment.ValidateRepo(i.PRCommentRepo)
+			// XXX: Get API Endpoint URL via repository URL.
+			apiURLString := strings.TrimSuffix(
+				eventPayload.Repository.URL,
+				fmt.Sprintf("/repos/%s/%s", eventPayload.Repository.Owner.Login, eventPayload.Repository.Name),
+			)
+			apiEndpoint, err := url.Parse(apiURLString)
 			if err != nil {
-				return nil, err
-			}
-
-			pullNumber, err := prcomment.ValidatePullNumber(int(i.PRCommentPRNumber))
-			if err != nil {
-				return nil, err
-			}
-
-			apiEndpoint, err := prcomment.ValidateAPIEndpoint(i.PRCommentAPIEndpoint)
-			if err != nil {
-				return nil, err
+				return nil, errors.Wrapf(err, "malformed API endpoint URL: %q", apiURLString)
 			}
 
 			prcommentOps = &prcomment.Options{
@@ -120,9 +119,9 @@ func NewValidateFunc(
 				SendIfSuccess: bool(i.PRCommentSendSuccess),
 				Token:         token,
 				APIEndpoint:   apiEndpoint,
-				Owner:         owner,
-				Repo:          repo,
-				PullNumber:    pullNumber,
+				Owner:         eventPayload.Repository.Owner.Login,
+				Repo:          eventPayload.Repository.Name,
+				PullNumber:    eventPayload.PullRequest.Number,
 			}
 		}
 

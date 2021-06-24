@@ -76,24 +76,9 @@ func BuildMetadata() GHActionsMetadata {
 				defaultValue: "",
 			},
 			StringInputDef{
-				name:         "pr_comment_owner",
-				desc:         "Owner of the GitHub repository (note: required if enable_pr_comment is true)",
-				defaultValue: "",
-			},
-			StringInputDef{
-				name:         "pr_comment_repo",
-				desc:         "Name of the GitHub repository (note: required if enable_pr_comment is true)",
-				defaultValue: "",
-			},
-			IntInputDef{
-				name:         "pr_comment_pull",
-				desc:         "Pull request number (note: required if enable_pr_comment is true)",
-				defaultValue: 0,
-			},
-			StringInputDef{
-				name:         "pr_comment_api_endpoint",
-				desc:         "GitHub API endpoint URL (example: https://api.github.com or https://github.example.com/api/v3, note: required if enable_pr_comment is true)",
-				defaultValue: "https://api.github.com",
+				name:         "pr_comment_event_path",
+				desc:         "File path to event payloads of the GitHub Action (note: required if enable_pr_comment is true)",
+				defaultValue: "${{ github.event_path }}",
 			},
 			BoolInputDef{
 				name:         "pr_comment_send_success",

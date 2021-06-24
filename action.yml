@@ -71,25 +71,10 @@ inputs:
     required: false
     default: ""
 
-  "pr_comment_owner":
-    description: "Owner of the GitHub repository (note: required if enable_pr_comment is true)"
+  "pr_comment_event_path":
+    description: "File path to event payloads of the GitHub Action (note: required if enable_pr_comment is true)"
     required: false
-    default: ""
-
-  "pr_comment_repo":
-    description: "Name of the GitHub repository (note: required if enable_pr_comment is true)"
-    required: false
-    default: ""
-
-  "pr_comment_pull":
-    description: "Pull request number (note: required if enable_pr_comment is true)"
-    required: false
-    default: "0"
-
-  "pr_comment_api_endpoint":
-    description: "GitHub API endpoint URL (example: https://api.github.com or https://github.example.com/api/v3, note: required if enable_pr_comment is true)"
-    required: false
-    default: "https://api.github.com"
+    default: "${{ github.event_path }}"
 
   "pr_comment_send_success":
     description: "Send a comment if no missing/dangling .meta found"
