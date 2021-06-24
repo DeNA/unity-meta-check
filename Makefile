@@ -34,9 +34,12 @@ out/unity-meta-autofix-darwin-amd64: out
 out/gh-action-yaml-gen-darwin-amd64: out
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -v -o "$@" ./tool/gh-action/action-yaml-gen 
 
+out/gh-action-darwin-amd64: out
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -v -o "$@" ./tool/gh-action
+
 
 # NOTE: meta-audit は Debug 用ツールなので必要になったら生成してください（生成されちゃうと Releases へあげるときに間引かないといけなくてめんどい）
-linux-amd64: out/unity-meta-check-linux-amd64 out/unity-meta-check-junit-linux-amd64 out/unity-meta-check-github-pr-comment-linux-amd64 out/unity-meta-autofix-linux-amd64 out/gh-action-yaml-gen-linux-amd64
+linux-amd64: out/unity-meta-check-linux-amd64 out/unity-meta-check-junit-linux-amd64 out/unity-meta-check-github-pr-comment-linux-amd64 out/unity-meta-autofix-linux-amd64 out/gh-action-yaml-gen-linux-amd64 out/gh-action-linux-amd64
 
 out/unity-meta-check-linux-amd64: out
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -v -o "$@"
@@ -55,6 +58,9 @@ out/unity-meta-autofix-linux-amd64: out
 
 out/gh-action-yaml-gen-linux-amd64: out
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -v -o "$@" ./tool/gh-action/action-yaml-gen 
+
+out/gh-action-linux-amd64: out
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -v -o "$@" ./tool/gh-action
 
 
 # NOTE: meta-audit は Debug 用ツールなので必要になったら生成してください（生成されちゃうと Releases へあげるときに間引かないといけなくてめんどい）
@@ -77,6 +83,9 @@ out/unity-meta-autofix-windows-amd64.exe: out
 
 out/gh-action-yaml-gen-windows-amd64.exe: out
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -v -o "$@" ./tool/gh-action/action-yaml-gen 
+
+out/gh-action-windows-amd64.exe: out
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -v -o "$@" ./tool/gh-action
 
 
 .PHONY: all test clean darwin-amd64 linux-amd64 windows-amd64
