@@ -16,6 +16,7 @@ type Runner func(opts *Options) (bool, error)
 func NewRunner(
 	check checker.Checker,
 	filter resultfilter.Filter,
+	writeJunitXML junit.WriteToFileFunc,
 	send prcomment.SendFunc,
 	doAutofix autofix.AutoFixer,
 	w io.Writer,
@@ -38,7 +39,7 @@ func NewRunner(
 		}
 
 		if opts.EnableJUnit {
-			if err := junit.WriteToFile(resultFiltered, startTime, opts.JUnitOutPath); err != nil {
+			if err := writeJunitXML(resultFiltered, startTime, opts.JUnitOutPath); err != nil {
 				return false, err
 			}
 		}

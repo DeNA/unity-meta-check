@@ -11,6 +11,7 @@ import (
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-autofix/autofix"
 	prcomment "github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/github"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/l10n"
+	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-junit/junit"
 	"github.com/DeNA/unity-meta-check/unity"
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/unity/meta"
@@ -59,6 +60,7 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 			logger,
 		),
 		resultfilter.NewFilter(logger),
+		junit.WriteToFile,
 		prcomment.NewSendFunc(prcomment.NewPullRequestCommentSender(prcomment.NewHttp(), logger)),
 		autofix.NewAutoFixer(
 			dryRun,
