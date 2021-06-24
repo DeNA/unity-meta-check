@@ -10,7 +10,7 @@ func SpyWriteCloser(base io.WriteCloser) *WriteCloserSpy {
 	if base != nil {
 		inherited = base
 	} else {
-		inherited = StubWriteCloser()
+		inherited = &NullWriteCloser{}
 	}
 
 	captured := &bytes.Buffer{}
