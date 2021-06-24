@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const ImageName = "docker.pkg.github.com/dena/unity-meta-check/unity-meta-check-gh-action"
+const ImageName = "ghcr.io/dena/unity-meta-check/unity-meta-check-gh-action"
 
 func ImageWithTag(version string) DockerImage {
 	return DockerImage(fmt.Sprintf("%s:%s", ImageName, version))
