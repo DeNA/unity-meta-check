@@ -51,6 +51,7 @@ func TestNewValidateFunc(t *testing.T) {
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{"ignore*"},
 			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                false,
 					IgnoreSubmodulesAndNested: false,
@@ -78,6 +79,7 @@ func TestNewValidateFunc(t *testing.T) {
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                true,
 					IgnoreSubmodulesAndNested: false,
@@ -106,6 +108,7 @@ func TestNewValidateFunc(t *testing.T) {
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                false,
 					IgnoreSubmodulesAndNested: false,
@@ -141,6 +144,7 @@ func TestNewValidateFunc(t *testing.T) {
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                false,
 					IgnoreSubmodulesAndNested: false,
@@ -184,6 +188,7 @@ func TestNewValidateFunc(t *testing.T) {
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			ReadTmpl: tmpl,
 			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                false,
 					IgnoreSubmodulesAndNested: false,
@@ -221,6 +226,7 @@ func TestNewValidateFunc(t *testing.T) {
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                false,
 					IgnoreSubmodulesAndNested: false,

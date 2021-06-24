@@ -2,19 +2,21 @@ package github
 
 import (
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/testutil"
 	"net/url"
-	"os"
 	"testing"
 )
 
 func TestNewPullRequestCommentSender(t *testing.T) {
 	spyLogger := logging.SpyLogger()
 
-	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" {
-		t.Skipf("need GITHUB_TOKEN")
+	testEnv, err := testutil.GetTestEnv()
+	if err != nil {
+		t.Log(err.Error())
+		t.Skip("no environment variables for tests")
 		return
 	}
+	token := testEnv.Token
 
 	endpoint, err := url.Parse("https://api.github.com")
 	if err != nil {

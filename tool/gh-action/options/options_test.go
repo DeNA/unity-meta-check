@@ -5,7 +5,6 @@ import (
 	"github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/tool/gh-action/inputs"
 	"github.com/DeNA/unity-meta-check/util/cli"
-	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/testutil"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/google/go-cmp/cmp"
@@ -33,37 +32,6 @@ func TestParse(t *testing.T) {
 			Args: []string{"-inputs-json", string(inputsJson), "path/to/target"},
 			Env:  map[string]string{"GITHUB_TOKEN": "T0K3N"},
 			Expected: &Options{
-				LogLevel:     logging.SeverityInfo,
-				UnsafeInputs: in,
-				Token:        "T0K3N",
-				RootDirAbs:   "path/to/target",
-			},
-		},
-		"-silent": {
-			Args: []string{"-inputs-json", string(inputsJson), "-silent", "path/to/target"},
-			Env:  map[string]string{"GITHUB_TOKEN": "T0K3N"},
-			Expected: &Options{
-				LogLevel:     logging.SeverityWarn,
-				UnsafeInputs: in,
-				Token:        "T0K3N",
-				RootDirAbs:   "path/to/target",
-			},
-		},
-		"-debug": {
-			Args: []string{"-inputs-json", string(inputsJson), "-debug", "path/to/target"},
-			Env:  map[string]string{"GITHUB_TOKEN": "T0K3N"},
-			Expected: &Options{
-				LogLevel:     logging.SeverityDebug,
-				UnsafeInputs: in,
-				Token:        "T0K3N",
-				RootDirAbs:   "path/to/target",
-			},
-		},
-		"both -silent and -debug": {
-			Args: []string{"-inputs-json", string(inputsJson), "-debug", "-silent", "path/to/target"},
-			Env:  map[string]string{"GITHUB_TOKEN": "T0K3N"},
-			Expected: &Options{
-				LogLevel:     logging.SeverityDebug,
 				UnsafeInputs: in,
 				Token:        "T0K3N",
 				RootDirAbs:   "path/to/target",
