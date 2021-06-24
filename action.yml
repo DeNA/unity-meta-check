@@ -87,7 +87,7 @@ runs:
   args:
     - "-inputs-json"
     - "${{ toJSON(inputs) }}"
-    - "$GITHUB_WORKSPACE"
+    - "${{ env.GITHUB_WORKSPACE }}"
 
 branding:
   icon: "check"
