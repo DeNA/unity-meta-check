@@ -5,8 +5,6 @@ import (
 	"io"
 )
 
-const Basename = "action.yml"
-
 func WriteTo(w io.Writer) (i int64, err error) {
 	metadata := BuildMetadata()
 	var j int

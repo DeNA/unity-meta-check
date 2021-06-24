@@ -60,6 +60,7 @@ func NewMetaNecessityInUnityProjectSubDir() MetaNecessity {
 	}
 }
 
+// IsHiddenBasename return whether the specified basename is treated as "hidden" by Unity.
 // > During the import process, Unity completely ignores the following files and folders in the Assets folder (or a sub-folder within it):
 // >
 // > Hidden folders.

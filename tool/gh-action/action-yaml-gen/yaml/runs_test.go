@@ -28,7 +28,9 @@ func getActualImageName(dockerfilePath string) (DockerImage, error) {
 	if err != nil {
 		return "", err
 	}
-	defer dockerfile.Close()
+	defer func(dockerfile *os.File) {
+		_ = dockerfile.Close()
+	}(dockerfile)
 
 	scanner := bufio.NewScanner(dockerfile)
 	if !scanner.Scan() {
