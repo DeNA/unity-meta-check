@@ -67,10 +67,10 @@ main() {
 		make clean test all
 		echo-stderr
 
-		[[ -d "./dist" ]] || throw "cannot find the generated distribution dir: '${BASE_DIR}/dist'"
+		[[ -d "./out" ]] || throw "cannot find the generated distribution dir: '${BASE_DIR}/out'"
 
 		echo-stderr "uploading executables..."
-		(cd "./dist"
+		(cd "./out"
 			find . -type f | sed 's/\.\///' | xargs gh release upload "$version"
 		)
 
