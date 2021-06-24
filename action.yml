@@ -64,7 +64,7 @@ inputs:
   "pr_comment_lang":
     description: "Language code for GitHub Pull Request Comments (available: en/ja, note: cannot specify both lang and pr_comment_tmpl_file)"
     required: false
-    default: "false"
+    default: "en"
 
   "pr_comment_tmpl_file":
     description: "File path to custom template file for GitHub Pull Request Comments (note: cannot specify both lang and pr_comment_tmpl_file)"

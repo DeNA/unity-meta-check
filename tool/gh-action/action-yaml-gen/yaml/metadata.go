@@ -65,10 +65,10 @@ func BuildMetadata() GHActionsMetadata {
 				desc:         "Enable reporting via GitHub Pull Request Comments",
 				defaultValue: false,
 			},
-			BoolInputDef{
+			StringInputDef{
 				name:         "pr_comment_lang",
 				desc:         "Language code for GitHub Pull Request Comments (available: en/ja, note: cannot specify both lang and pr_comment_tmpl_file)",
-				defaultValue: false,
+				defaultValue: "en",
 			},
 			StringInputDef{
 				name:         "pr_comment_tmpl_file",
