@@ -12,24 +12,11 @@ jobs:
           name: Test
           command: unity-meta-check --version
 
-  test-linux:
-    docker:
-      - image: cimg/go:1.16
-
-    steps:
-      - checkout
-      - run:
-          name: Test on Linux
-          command: |
-            git submodule update --init --recursive
-            go test -v ./...
-
 workflows:
   version: 2
 
-  test-linux-and-go-get:
+  main:
     jobs:
-      - test-linux
       - go_get:
           filters:
             branches:
