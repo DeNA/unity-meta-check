@@ -318,7 +318,7 @@ func TestNewValidateFunc(t *testing.T) {
 				EnablePRComment: false,
 				EnableAutofix:   true,
 				AutofixOpts: &autofix.Options{
-					RootDirAbs:   "/path/to/project",
+					RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 					RootDirRel:   ".",
 					AllowedGlobs: []globs.Glob{"Assets/Allow/To/Fix/*"},
 				},
