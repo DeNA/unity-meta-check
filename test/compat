@@ -65,4 +65,10 @@ main() {
 }
 
 
-main "$@"
+case "$*" in
+	--help | -h)
+		usage
+		false ;;
+	*)
+		main "$@" ;;
+esac
