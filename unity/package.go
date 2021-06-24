@@ -15,16 +15,17 @@ const LocalPkgPrefixLen = len(LocalPkgPrefix)
 
 type FindPackages func(projRoot typedpath.RawPath) ([]*FoundPackage, error)
 
-// Input:
-// "dependencies": {
-//   ...
-//   "com.my.pkg": "1.0.0"
-//   "com.my.local.pkg": "file:../MyLocalPkg/com.my.local.pkg"
-//   "com.my.another.local.pkg": "file:../MyLocalPkg/com.my.another.local.pkg"
-//   ...
-// }
+// NewFindPackages returns the dependencies field of manifest.json. For example,
+// 	Input:
+// 	"dependencies": {
+// 	  ...
+// 	  "com.my.pkg": "1.0.0"
+// 	  "com.my.local.pkg": "file:../MyLocalPkg/com.my.local.pkg"
+// 	  "com.my.another.local.pkg": "file:../MyLocalPkg/com.my.another.local.pkg"
+// 	  ...
+// 	}
 //
-// Output: []string{"Packages/com.my.pkg", "MyLocalPkg/com.my.local.pkg", "MyLocalPkg/com.my.another.local.pkg"}
+// 	Output: []string{"Packages/com.my.pkg", "MyLocalPkg/com.my.local.pkg", "MyLocalPkg/com.my.another.local.pkg"}
 func NewFindPackages(logger logging.Logger) FindPackages {
 	return func(rootDirAbs typedpath.RawPath) ([]*FoundPackage, error) {
 		if !rootDirAbs.IsAbs() {

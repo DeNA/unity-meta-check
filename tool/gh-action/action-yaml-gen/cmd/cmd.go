@@ -38,7 +38,9 @@ func writeYAML(actionYAMLPath string) error {
 	if err != nil {
 		return errors.Wrapf(err, "cannot open: %q", actionYAMLPath)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 
 	if _, err := yaml.WriteTo(f); err != nil {
 		return errors.Wrapf(err, "cannot write YAML to: %q", actionYAMLPath)

@@ -36,7 +36,7 @@ func NewPathTree(paths ...typedpath.SlashPath) *PathTree {
 	return &PathTree{includeEmpty, root}
 }
 
-// Returns whether the pathElements is a member of the tree.
+// Member returns whether the pathElements is a member of the tree.
 // Notably, returns false if the pathElements point at the tree.
 func (t *PathTree) Member(pathElements []typedpath.BaseName) bool {
 	if t.End {

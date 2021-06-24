@@ -20,6 +20,7 @@ func (w WriteCloserStub) Close() error {
 	return w.CloseErr
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func StubWriteCloser(writeErr, closeErr error) io.WriteCloser {
 	return &WriteCloserStub{
 		WriteErr: writeErr,
