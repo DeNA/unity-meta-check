@@ -105,8 +105,8 @@ func BuildMetadata() GHActionsMetadata {
 			Image: ImageWithTag(version.Version),
 			Args: []string{
 				`-inputs-json`,
-				`{{ toJSON(github.inputs) }}`,
-				`{{ github.workspace }}`,
+				`${{ toJSON(github.inputs) }}`,
+				`${{ github.workspace }}`,
 			},
 		},
 		BrandingIcon:  BrandingIconCheck,
