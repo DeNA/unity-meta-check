@@ -4,17 +4,20 @@ import (
 	"bytes"
 	"github.com/google/go-cmp/cmp"
 	"os"
-	"reflect"
+	"strings"
 	"testing"
 )
 
 // NOTE: This test is fragile, but we can use like Golden Testing.
 func TestRecentActionYAML(t *testing.T) {
-	actual, err := os.ReadFile("../testdata/action.yml")
+	actualRawBytes, err := os.ReadFile("../testdata/action.yml")
 	if err != nil {
 		t.Errorf("want nil, got %v", err)
 		return
 	}
+
+	// NOTE: On Windows, Git may replace \n to \r\n on specific configurations.
+	actual := strings.NewReplacer("\r", "").Replace(string(actualRawBytes))
 
 	buf := &bytes.Buffer{}
 	if _, err := WriteTo(buf); err != nil {
@@ -22,7 +25,7 @@ func TestRecentActionYAML(t *testing.T) {
 		return
 	}
 
-	if !reflect.DeepEqual(buf.Bytes(), actual) {
-		t.Error(cmp.Diff(buf.String(), string(actual)))
+	if buf.String() != actual {
+		t.Error(cmp.Diff(buf.String(), actual))
 	}
 }
