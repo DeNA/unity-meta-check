@@ -11,6 +11,11 @@ inputs:
     required: false
     default: "INFO"
 
+  "target_path":
+    description: "Target directory path to check"
+    required: false
+    default: "${{ github.workspace }}"
+
   "target_type":
     description: "Target type for unity-meta-check (available: auto-detect/unity-project/unity-project-sub-dir/upm-package)"
     required: false
@@ -86,7 +91,6 @@ runs:
   image: "docker://ghcr.io/dena/unity-meta-check/unity-meta-check-gh-action:3.0.0-dev1"
   args:
     - "-inputs-json"
-    - "${{ github.workspace }}"
     - "${{ toJSON(inputs) }}"
 
 branding:

@@ -8,7 +8,6 @@ import (
 	"github.com/DeNA/unity-meta-check/tool/gh-action/inputs"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/github"
 	"github.com/DeNA/unity-meta-check/util/cli"
-	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/pkg/errors"
 )
 
@@ -16,17 +15,16 @@ type Options struct {
 	Version      bool
 	UnsafeInputs inputs.Inputs
 	Token        github.Token
-	RootDirAbs   typedpath.RawPath
 }
 
 type Parser func(args []string, procInout cli.ProcessInout, env cli.Env) (*Options, error)
 
-func NewParser(validateRootDirAbs options.RootDirAbsValidator) Parser {
+func NewParser() Parser {
 	return func(args []string, procInout cli.ProcessInout, env cli.Env) (*Options, error) {
 		flags := flag.NewFlagSet("unity-meta-check-gh-action", flag.ContinueOnError)
 		flags.SetOutput(procInout.Stderr)
 		flags.Usage = func() {
-			_, _ = fmt.Fprintln(flags.Output(), "usage: unity-meta-check-gh-action -inputs-json <json> <path>")
+			_, _ = fmt.Fprintln(flags.Output(), "usage: unity-meta-check-gh-action -inputs-json <json>")
 			flags.PrintDefaults()
 		}
 
@@ -41,14 +39,8 @@ func NewParser(validateRootDirAbs options.RootDirAbsValidator) Parser {
 			return &Options{Version: *version}, nil
 		}
 
-		if flags.NArg() != 1 {
-			return nil, fmt.Errorf("must specify 1 argument as path to check, but come %d arguments: %#v", flags.NArg(), flags.Args())
-		}
-
-		unsafeRootDir := typedpath.NewRawPathUnsafe(flags.Arg(0))
-		rootDirAbs, err := validateRootDirAbs(unsafeRootDir)
-		if err != nil {
-			return nil, err
+		if flags.NArg() > 0 {
+			return nil, fmt.Errorf("0 arguments required, but come %d arguments: %#v", flags.NArg(), flags.Args())
 		}
 
 		var unsafeInputs inputs.Inputs
@@ -64,7 +56,6 @@ func NewParser(validateRootDirAbs options.RootDirAbsValidator) Parser {
 		return &Options{
 			UnsafeInputs: unsafeInputs,
 			Token:        token,
-			RootDirAbs:   rootDirAbs,
 		}, nil
 	}
 }

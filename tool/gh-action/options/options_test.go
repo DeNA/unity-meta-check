@@ -2,11 +2,9 @@ package options
 
 import (
 	"encoding/json"
-	"github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/tool/gh-action/inputs"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/testutil"
-	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/google/go-cmp/cmp"
 	"io"
 	"reflect"
@@ -24,17 +22,15 @@ func TestParse(t *testing.T) {
 
 	cases := map[string]struct {
 		Args     []string
-		Cwd      typedpath.SlashPath
 		Env      map[string]string
 		Expected *Options
 	}{
 		"easiest case": {
-			Args: []string{"-inputs-json", string(inputsJson), string(typedpath.NewRootRawPath("path", "to", "repo"))},
+			Args: []string{"-inputs-json", string(inputsJson)},
 			Env:  map[string]string{"GITHUB_TOKEN": "T0K3N"},
 			Expected: &Options{
 				UnsafeInputs: in,
 				Token:        "T0K3N",
-				RootDirAbs:   typedpath.NewRootRawPath("path", "to", "repo"),
 			},
 		},
 		"-version": {
@@ -56,7 +52,7 @@ func TestParse(t *testing.T) {
 				Stderr: stderr,
 			}
 
-			parse := NewParser(options.FakeRootDirValidator(c.Cwd.ToRaw()))
+			parse := NewParser()
 			opts, err := parse(c.Args, procInout, cli.StubEnv(c.Env))
 			if err != nil {
 				t.Errorf("want nil, got %#v", err)
