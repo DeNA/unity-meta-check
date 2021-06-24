@@ -152,3 +152,41 @@ func TestMarshalUnmarshal(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestValidateTargetType(t *testing.T) {
+	cases := []struct {
+		TargetType string
+		Expected   TargetType
+	}{
+		{
+			TargetType: "auto-detect",
+			Expected:   TargetTypeAuto,
+		},
+		{
+			TargetType: "upm-package",
+			Expected:   TargetTypeUpmPackage,
+		},
+		{
+			TargetType: "unity-project",
+			Expected:   TargetTypeUnityProj,
+		},
+		{
+			TargetType: "unity-project-sub-dir",
+			Expected:   TargetTypeUnityProjSubDir,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.TargetType, func(t *testing.T) {
+			actual, err := ValidateTargetType(c.TargetType)
+			if err != nil {
+				t.Errorf("want nil, got %#v", err)
+				return
+			}
+
+			if actual != c.Expected {
+				t.Errorf("want %q, got %q", c.Expected, actual)
+			}
+		})
+	}
+}

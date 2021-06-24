@@ -97,6 +97,81 @@ func TestNewValidateFunc(t *testing.T) {
 				EnableAutofix:   false,
 			},
 		},
+		"explicit unity-project": {
+			RootDirAbs: "/path/to/project",
+			Inputs: inputs.Inputs{
+				LogLevel:   "INFO",
+				TargetType: "unity-project",
+			},
+			BuiltIgnoredGlobs:  []globs.Glob{"ignore*"},
+			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
+				CheckerOpts: &checker.Options{
+					IgnoreCase:                false,
+					IgnoreSubmodulesAndNested: false,
+					TargetType: checker.TargetTypeIsUnityProjectRootDirectory,
+				},
+				FilterOpts: &resultfilter.Options{
+					IgnoreDangling: false,
+					// NOTE: same as the value of BuiltIgnoredGlobs.
+					IgnoredGlobs: []globs.Glob{"ignore*"},
+					IgnoreCase:   false,
+				},
+				EnableJUnit:     false,
+				EnablePRComment: false,
+				EnableAutofix:   false,
+			},
+		},
+		"explicit unity-project-sub-dir": {
+			RootDirAbs: "/path/to/project/Assets/Foo",
+			Inputs: inputs.Inputs{
+				LogLevel:   "INFO",
+				TargetType: "unity-project-sub-dir",
+			},
+			BuiltIgnoredGlobs:  []globs.Glob{"ignore*"},
+			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project", "Assets", "Foo"),
+				CheckerOpts: &checker.Options{
+					IgnoreCase:                false,
+					IgnoreSubmodulesAndNested: false,
+					TargetType: checker.TargetTypeIsUnityProjectSubDirectory,
+				},
+				FilterOpts: &resultfilter.Options{
+					IgnoreDangling: false,
+					// NOTE: same as the value of BuiltIgnoredGlobs.
+					IgnoredGlobs: []globs.Glob{"ignore*"},
+					IgnoreCase:   false,
+				},
+				EnableJUnit:     false,
+				EnablePRComment: false,
+				EnableAutofix:   false,
+			},
+		},
+		"explicit upm-package": {
+			RootDirAbs: "/path/to/project/Packages/com.example.pkg",
+			Inputs: inputs.Inputs{
+				LogLevel:   "INFO",
+				TargetType: "upm-package",
+			},
+			BuiltIgnoredGlobs:  []globs.Glob{"ignore*"},
+			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project", "Packages", "com.example.pkg"),
+				CheckerOpts: &checker.Options{
+					IgnoreCase:                false,
+					IgnoreSubmodulesAndNested: false,
+					TargetType: checker.TargetTypeIsUnityProjectSubDirectory,
+				},
+				FilterOpts: &resultfilter.Options{
+					IgnoreDangling: false,
+					// NOTE: same as the value of BuiltIgnoredGlobs.
+					IgnoredGlobs: []globs.Glob{"ignore*"},
+					IgnoreCase:   false,
+				},
+				EnableJUnit:     false,
+				EnablePRComment: false,
+				EnableAutofix:   false,
+			},
+		},
 		"enable junit": {
 			RootDirAbs: "/path/to/project",
 			Inputs: inputs.Inputs{
