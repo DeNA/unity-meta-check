@@ -6,6 +6,7 @@ import (
 	"github.com/DeNA/unity-meta-check/git"
 	common "github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/resultfilter"
+	"github.com/DeNA/unity-meta-check/tool/gh-action/inputs"
 	"github.com/DeNA/unity-meta-check/tool/gh-action/options"
 	"github.com/DeNA/unity-meta-check/tool/gh-action/runner"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-autofix/autofix"
@@ -44,6 +45,7 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 		common.NewIgnoredGlobsBuilder(logger),
 		autofix.NewOptionsBuilder(ostestable.NewGetwd()),
 		l10n.ReadTemplateFile,
+		inputs.ReadEventPayload,
 	)
 	runnerOpts, err := validate(opts.RootDirAbs, opts.UnsafeInputs, opts.Token)
 	if err != nil {

@@ -47,12 +47,9 @@ type Inputs struct {
 	JUnitXMLPath typedpath.RawPath `json:"junit_xml_path"`
 
 	EnablePRComment       StringifyBool     `json:"enable_pr_comment"`
-	PRCommentPRNumber     StringifyInt      `json:"pr_comment_pull"`
 	PRCommentTmplFilePath typedpath.RawPath `json:"pr_comment_tmpl_file"`
 	PRCommentLang         string            `json:"pr_comment_lang"`
-	PRCommentOwner        string            `json:"pr_comment_owner"`
-	PRCommentRepo         string            `json:"pr_comment_repo"`
-	PRCommentAPIEndpoint  string            `json:"pr_comment_api_endpoint"`
+	PRCommentEventPath    typedpath.RawPath `json:"pr_comment_event_path"`
 	PRCommentSendSuccess  StringifyBool     `json:"pr_comment_send_success"`
 }
 

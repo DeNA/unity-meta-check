@@ -39,6 +39,7 @@ func TestNewValidateFunc(t *testing.T) {
 		Token              github.Token
 		DetectedTargetType checker.TargetType
 		BuiltIgnoredGlobs  []globs.Glob
+		ReadPayload        *inputs.PullRequestEventPayload
 		ReadTmpl           *l10n.Template
 		Expected           *Options
 	}{
@@ -208,16 +209,21 @@ func TestNewValidateFunc(t *testing.T) {
 				LogLevel:             "INFO",
 				TargetType:           "auto-detect",
 				EnablePRComment:      true,
-				PRCommentPRNumber:    123,
-				PRCommentLang:        "en",
-				PRCommentOwner:       "octocat",
-				PRCommentRepo:        "Hello-World",
-				PRCommentAPIEndpoint: "https://api.github.com",
+				PRCommentLang:        "ja",
+				PRCommentEventPath:   typedpath.NewRootRawPath("github", "event.json"),
 				PRCommentSendSuccess: true,
 			},
 			Token:              "T0K3N",
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
+			ReadPayload: &inputs.PullRequestEventPayload{
+				PullRequest: inputs.PullRequest{Number: 2},
+				Repository: inputs.Repository{
+					URL:   "https://api.github.com/repos/Codertocat/Hello-World",
+					Name:  "Hello-World",
+					Owner: inputs.User{Login: "Codertocat"},
+				},
+			},
 			Expected: &Options{
 				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
@@ -235,13 +241,13 @@ func TestNewValidateFunc(t *testing.T) {
 				EnableJUnit:     false,
 				EnablePRComment: true,
 				PRCommentOpts: &github.Options{
-					Tmpl:          &l10n.En,
+					Tmpl:          &l10n.Ja,
 					SendIfSuccess: true,
 					Token:         "T0K3N",
 					APIEndpoint:   githubComAPIEndpoint,
-					Owner:         "octocat",
+					Owner:         "Codertocat",
 					Repo:          "Hello-World",
-					PullNumber:    123,
+					PullNumber:    2,
 				},
 			},
 		},
@@ -251,17 +257,22 @@ func TestNewValidateFunc(t *testing.T) {
 				LogLevel:              "INFO",
 				TargetType:            "auto-detect",
 				EnablePRComment:       true,
-				PRCommentPRNumber:     123,
 				PRCommentTmplFilePath: "path/to/tmpl.json",
-				PRCommentOwner:        "octocat",
-				PRCommentRepo:         "Hello-World",
-				PRCommentAPIEndpoint:  "https://api.github.com",
+				PRCommentEventPath:    typedpath.NewRootRawPath("github", "event.json"),
 				PRCommentSendSuccess:  true,
 			},
 			Token:              "T0K3N",
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			ReadTmpl:           tmpl,
+			ReadPayload: &inputs.PullRequestEventPayload{
+				PullRequest: inputs.PullRequest{Number: 2},
+				Repository: inputs.Repository{
+					URL:   "https://api.github.com/repos/Codertocat/Hello-World",
+					Name:  "Hello-World",
+					Owner: inputs.User{Login: "Codertocat"},
+				},
+			},
 			Expected: &Options{
 				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
@@ -283,9 +294,9 @@ func TestNewValidateFunc(t *testing.T) {
 					SendIfSuccess: true,
 					Token:         "T0K3N",
 					APIEndpoint:   githubComAPIEndpoint,
-					Owner:         "octocat",
+					Owner:         "Codertocat",
 					Repo:          "Hello-World",
-					PullNumber:    123,
+					PullNumber:    2,
 				},
 			},
 		},
@@ -318,7 +329,7 @@ func TestNewValidateFunc(t *testing.T) {
 				EnablePRComment: false,
 				EnableAutofix:   true,
 				AutofixOpts: &autofix.Options{
-					RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
+					RootDirAbs:   typedpath.NewRootRawPath("path", "to", "project"),
 					RootDirRel:   ".",
 					AllowedGlobs: []globs.Glob{"Assets/Allow/To/Fix/*"},
 				},
@@ -333,6 +344,7 @@ func TestNewValidateFunc(t *testing.T) {
 				options.StubIgnoredPathBuilder(c.BuiltIgnoredGlobs, nil),
 				autofix.StubOptionsBuilderWithRootDirAbsAndRel(c.RootDirRel),
 				l10n.StubTemplateFileReader(c.ReadTmpl, nil),
+				inputs.StubReadEventPayload(c.ReadPayload, nil),
 			)
 
 			opts, err := validate(c.RootDirAbs, c.Inputs, c.Token)
