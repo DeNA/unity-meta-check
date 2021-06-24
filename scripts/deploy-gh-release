@@ -36,12 +36,6 @@ usage-error() {
 
 
 main() {
-	local arg="${1:-}"
-	if [[ "$arg" == "--help" ]] || [[  "$arg" == "-h" ]]; then
-		usage
-		false
-	fi
-
 	local version
 	version="$("$BASE_DIR/scripts/print-version")"
 
@@ -79,4 +73,10 @@ main() {
 }
 
 
-main "$@"
+case "$*" in
+	--help | -h)
+		usage
+		false ;;
+	*)
+		main "$@" ;;
+esac

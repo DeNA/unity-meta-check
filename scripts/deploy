@@ -44,10 +44,6 @@ usage-error() {
 
 main() {
 	local arg="${1:-}"
-	if [[ "$arg" == "--help" ]] || [[  "$arg" == "-h" ]]; then
-		usage
-		false
-	fi
 
 	has go || throw "'go' must be installed (see https://golang.org)"
 	has gh || throw "'gh' must be installed (see https://cli.github.com)"
@@ -76,4 +72,10 @@ main() {
 }
 
 
-main "$@"
+case "$*" in
+	--help | -h)
+		usage
+		false ;;
+	*)
+		main "$@" ;;
+esac
