@@ -33,8 +33,8 @@ func TestNewValidateFunc(t *testing.T) {
 	}
 
 	cases := map[string]struct {
-		RootDirAbs         typedpath.SlashPath
-		RootDirRel         typedpath.SlashPath
+		RootDirAbs         typedpath.RawPath
+		RootDirRel         typedpath.RawPath
 		Inputs             inputs.Inputs
 		Token              github.Token
 		DetectedTargetType checker.TargetType
@@ -43,7 +43,7 @@ func TestNewValidateFunc(t *testing.T) {
 		Expected           *Options
 	}{
 		"all default": {
-			RootDirAbs: "/path/to/project",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
 				TargetType: "auto-detect",
@@ -70,7 +70,7 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"ignore-case": {
-			RootDirAbs: "/path/to/project",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
 				TargetType: "auto-detect",
@@ -98,18 +98,18 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"explicit unity-project": {
-			RootDirAbs: "/path/to/project",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
 				TargetType: "unity-project",
 			},
-			BuiltIgnoredGlobs:  []globs.Glob{"ignore*"},
+			BuiltIgnoredGlobs: []globs.Glob{"ignore*"},
 			Expected: &Options{
 				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                false,
 					IgnoreSubmodulesAndNested: false,
-					TargetType: checker.TargetTypeIsUnityProjectRootDirectory,
+					TargetType:                checker.TargetTypeIsUnityProjectRootDirectory,
 				},
 				FilterOpts: &resultfilter.Options{
 					IgnoreDangling: false,
@@ -123,18 +123,18 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"explicit unity-project-sub-dir": {
-			RootDirAbs: "/path/to/project/Assets/Foo",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project", "Assets", "Foo"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
 				TargetType: "unity-project-sub-dir",
 			},
-			BuiltIgnoredGlobs:  []globs.Glob{"ignore*"},
+			BuiltIgnoredGlobs: []globs.Glob{"ignore*"},
 			Expected: &Options{
 				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project", "Assets", "Foo"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                false,
 					IgnoreSubmodulesAndNested: false,
-					TargetType: checker.TargetTypeIsUnityProjectSubDirectory,
+					TargetType:                checker.TargetTypeIsUnityProjectSubDirectory,
 				},
 				FilterOpts: &resultfilter.Options{
 					IgnoreDangling: false,
@@ -148,18 +148,18 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"explicit upm-package": {
-			RootDirAbs: "/path/to/project/Packages/com.example.pkg",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project", "Packages", "com.example.pkg"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
 				TargetType: "upm-package",
 			},
-			BuiltIgnoredGlobs:  []globs.Glob{"ignore*"},
+			BuiltIgnoredGlobs: []globs.Glob{"ignore*"},
 			Expected: &Options{
 				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project", "Packages", "com.example.pkg"),
 				CheckerOpts: &checker.Options{
 					IgnoreCase:                false,
 					IgnoreSubmodulesAndNested: false,
-					TargetType: checker.TargetTypeIsUnityProjectSubDirectory,
+					TargetType:                checker.TargetTypeIsUnityProjectSubDirectory,
 				},
 				FilterOpts: &resultfilter.Options{
 					IgnoreDangling: false,
@@ -173,12 +173,12 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"enable junit": {
-			RootDirAbs: "/path/to/project",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:     "INFO",
 				TargetType:   "auto-detect",
 				EnableJUnit:  true,
-				JUnitXMLPath: "/path/to/project/junit.xml",
+				JUnitXMLPath: typedpath.NewRootRawPath("path", "to", "project", "junit.xml"),
 			},
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
@@ -197,13 +197,13 @@ func TestNewValidateFunc(t *testing.T) {
 					IgnoreCase:   false,
 				},
 				EnableJUnit:     true,
-				JUnitOutPath:    "/path/to/project/junit.xml",
+				JUnitOutPath:    typedpath.NewRootRawPath("path", "to", "project", "junit.xml"),
 				EnablePRComment: false,
 				EnableAutofix:   false,
 			},
 		},
 		"enable pr-comment with lang": {
-			RootDirAbs: "/path/to/project",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:             "INFO",
 				TargetType:           "auto-detect",
@@ -246,7 +246,7 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"enable pr-comment with a template file": {
-			RootDirAbs: "/path/to/project",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:              "INFO",
 				TargetType:            "auto-detect",
@@ -261,7 +261,7 @@ func TestNewValidateFunc(t *testing.T) {
 			Token:              "T0K3N",
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
-			ReadTmpl: tmpl,
+			ReadTmpl:           tmpl,
 			Expected: &Options{
 				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 				CheckerOpts: &checker.Options{
@@ -290,7 +290,7 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"enable autofix": {
-			RootDirAbs: "/path/to/project",
+			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			RootDirRel: ".",
 			Inputs: inputs.Inputs{
 				LogLevel:      "INFO",
@@ -331,11 +331,11 @@ func TestNewValidateFunc(t *testing.T) {
 			validate := NewValidateFunc(
 				options.StubUnityProjectDetector(c.DetectedTargetType, nil),
 				options.StubIgnoredPathBuilder(c.BuiltIgnoredGlobs, nil),
-				autofix.StubOptionsBuilderWithRootDirAbsAndRel(c.RootDirRel.ToRaw()),
+				autofix.StubOptionsBuilderWithRootDirAbsAndRel(c.RootDirRel),
 				l10n.StubTemplateFileReader(c.ReadTmpl, nil),
 			)
 
-			opts, err := validate(c.RootDirAbs.ToRaw(), c.Inputs, c.Token)
+			opts, err := validate(c.RootDirAbs, c.Inputs, c.Token)
 			if err != nil {
 				t.Errorf("want nil, got %#v", err)
 				return

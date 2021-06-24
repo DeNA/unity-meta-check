@@ -34,26 +34,26 @@ func ValidateTargetType(unsafeTargetType string) (TargetType, error) {
 type Inputs struct {
 	LogLevel string `json:"log_level"`
 
-	TargetType                string              `json:"target_type"`
-	IgnoreDangling            StringifyBool       `json:"ignore_dangling"`
-	IgnoreCase                StringifyBool       `json:"ignore_case"`
-	IgnoreSubmodulesAndNested StringifyBool       `json:"ignore_submodules_and_nested"`
-	IgnoredFilePath           typedpath.SlashPath `json:"ignored_file_path"`
+	TargetType                string            `json:"target_type"`
+	IgnoreDangling            StringifyBool     `json:"ignore_dangling"`
+	IgnoreCase                StringifyBool     `json:"ignore_case"`
+	IgnoreSubmodulesAndNested StringifyBool     `json:"ignore_submodules_and_nested"`
+	IgnoredFilePath           typedpath.RawPath `json:"ignored_file_path"`
 
 	EnableAutofix StringifyBool `json:"enable_autofix"`
 	AutofixGlobs  []string      `json:"autofix_globs"`
 
-	EnableJUnit  StringifyBool       `json:"enable_junit"`
-	JUnitXMLPath typedpath.SlashPath `json:"junit_xml_path"`
+	EnableJUnit  StringifyBool     `json:"enable_junit"`
+	JUnitXMLPath typedpath.RawPath `json:"junit_xml_path"`
 
-	EnablePRComment       StringifyBool       `json:"enable_pr_comment"`
-	PRCommentPRNumber     StringifyInt        `json:"pr_comment_pull"`
-	PRCommentTmplFilePath typedpath.SlashPath `json:"pr_comment_tmpl_file"`
-	PRCommentLang         string              `json:"pr_comment_lang"`
-	PRCommentOwner        string              `json:"pr_comment_owner"`
-	PRCommentRepo         string              `json:"pr_comment_repo"`
-	PRCommentAPIEndpoint  string              `json:"pr_comment_api_endpoint"`
-	PRCommentSendSuccess  StringifyBool       `json:"pr_comment_send_success"`
+	EnablePRComment       StringifyBool     `json:"enable_pr_comment"`
+	PRCommentPRNumber     StringifyInt      `json:"pr_comment_pull"`
+	PRCommentTmplFilePath typedpath.RawPath `json:"pr_comment_tmpl_file"`
+	PRCommentLang         string            `json:"pr_comment_lang"`
+	PRCommentOwner        string            `json:"pr_comment_owner"`
+	PRCommentRepo         string            `json:"pr_comment_repo"`
+	PRCommentAPIEndpoint  string            `json:"pr_comment_api_endpoint"`
+	PRCommentSendSuccess  StringifyBool     `json:"pr_comment_send_success"`
 }
 
 type StringifyBool bool
