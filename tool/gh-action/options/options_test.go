@@ -29,12 +29,12 @@ func TestParse(t *testing.T) {
 		Expected *Options
 	}{
 		"easiest case": {
-			Args: []string{"-inputs-json", string(inputsJson), string(typedpath.NewRawPath("path", "to", "target"))},
+			Args: []string{"-inputs-json", string(inputsJson), string(typedpath.NewRootRawPath("path", "to", "repo"))},
 			Env:  map[string]string{"GITHUB_TOKEN": "T0K3N"},
 			Expected: &Options{
 				UnsafeInputs: in,
 				Token:        "T0K3N",
-				RootDirAbs:   "path/to/target",
+				RootDirAbs:   typedpath.NewRootRawPath("path", "to", "repo"),
 			},
 		},
 		"-version": {
