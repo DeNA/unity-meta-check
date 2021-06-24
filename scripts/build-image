@@ -20,10 +20,6 @@ EOS
 
 main() {
 	local arg="${1:-}"
-	if [[ "$arg" == "-h" || "$arg" == "--help" || "$arg" == "help" ]]; then
-		usage
-		false
-	fi
 
 	(cd "$BASE_DIR"
 		local version
@@ -56,4 +52,10 @@ main() {
 }
 
 
-main "$@"
+case "$*" in
+	--help | -h)
+		usage
+		false ;;
+	*)
+		main "$@" ;;
+esac
