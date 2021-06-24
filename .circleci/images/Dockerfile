@@ -1,4 +1,4 @@
-# image-name: docker.pkg.github.com/dena/unity-meta-check/unity-meta-check-circleci
+# image-name: ghcr.io/dena/unity-meta-check/unity-meta-check-circleci
 FROM golang:1.16-buster as builder
 WORKDIR /go/src/unity-meta-check
 COPY . .

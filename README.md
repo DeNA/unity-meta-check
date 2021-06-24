@@ -67,10 +67,10 @@ Installation
 This way is recommended to use unity-meta-check on CI.
 
 ```console
-$ docker pull docker.pkg.github.com/dena/unity-meta-check/unity-meta-check:latest
+$ docker pull ghcr.io/dena/unity-meta-check/unity-meta-check:latest
 
 $ cd path/to/your/proj 
-$ docker run -v "$(pwd):/target" --rm docker.pkg.github.com/dena/unity-meta-check/unity-meta-check-v2:latest -silent /target
+$ docker run -v "$(pwd):/target" --rm ghcr.io/dena/unity-meta-check/unity-meta-check:latest -silent /target
 missing Assets/AssetsMissing.meta
 missing LocalPackages/com.example.local.pkg/LocalPkgMissing.meta
 missing Packages/com.example.pkg/PkgMissing.meta
@@ -78,7 +78,7 @@ dangling Assets/AssetsDangling.meta
 dangling LocalPackages/com.example.local.pkg/LocalPkgDangling.meta
 dangling Packages/com.example.pkg/PkgDangling.meta
 
-$ docker run --rm docker.pkg.github.com/dena/unity-meta-check/unity-meta-check-v2:latest -help
+$ docker run --rm ghcr.io/dena/unity-meta-check/unity-meta-check:latest -help
 usage: unity-meta-check [<options>] [<path>]
 ...
 ```
