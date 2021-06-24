@@ -105,7 +105,7 @@ func WriteRunsAsGHActionYAML(w io.Writer, runs DockerAction) (i int64, err error
 runs:
   using: "docker"
   image: %q
-`[1:], runs.Image)
+`[1:], fmt.Sprintf("docker://%s", runs.Image))
 	i += int64(j)
 	if err != nil {
 		return
