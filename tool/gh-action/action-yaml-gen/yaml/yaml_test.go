@@ -2,6 +2,7 @@ package yaml
 
 import (
 	"bytes"
+	"github.com/DeNA/unity-meta-check/version"
 	"github.com/google/go-cmp/cmp"
 	"os"
 	"strings"
@@ -17,7 +18,7 @@ func TestRecentActionYAML(t *testing.T) {
 	}
 
 	// NOTE: On Windows, Git may replace \n to \r\n on specific configurations.
-	actual := strings.NewReplacer("\r", "").Replace(string(actualRawBytes))
+	actual := strings.NewReplacer("\r", "", "%VERSION%", version.Version).Replace(string(actualRawBytes))
 
 	buf := &bytes.Buffer{}
 	if _, err := WriteTo(buf); err != nil {
