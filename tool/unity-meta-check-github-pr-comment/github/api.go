@@ -39,6 +39,7 @@ func NewPullRequestCommentSender(send HttpFunc, logger logging.Logger) PullReque
 		}
 
 		logger.Debug(fmt.Sprintf("token: %s", strings.Repeat("*", len(token))))
+		req.Header.Add("Accept", "application/vnd.github.v3+json")
 		req.Header.Add("Authorization", fmt.Sprintf("token %s", token))
 		req.Header.Add("Content-Type", "application/json")
 
