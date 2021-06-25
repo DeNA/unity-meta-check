@@ -17,7 +17,7 @@ func BuildMetadata() GHActionsMetadata {
 			},
 			StringInputDef{
 				name:         "target_path",
-				desc:         "Target directory path to check",
+				desc:         "Target directory path to check. Relative path is treated as a path from $GITHUB_WORKSPACE (default: .)",
 				defaultValue: ".",
 			},
 			StringInputDef{
@@ -52,8 +52,8 @@ func BuildMetadata() GHActionsMetadata {
 			},
 			StringInputDef{
 				name:         "autofix_globs",
-				desc:         "Comma separated globs that match directories to where to allow autofix (note: required if enable_autofix is true)",
-				defaultValue: "",
+				desc:         "Comma separated globs that match directories to where to allow autofix (example: use '*' to allow autofix all files, note: required if enable_autofix is true)",
+				defaultValue: "*",
 			},
 			BoolInputDef{
 				name:         "enable_junit",
@@ -79,11 +79,6 @@ func BuildMetadata() GHActionsMetadata {
 				name:         "pr_comment_tmpl_file",
 				desc:         "File path to custom template file for GitHub Pull Request Comments (note: cannot specify both lang and pr_comment_tmpl_file)",
 				defaultValue: "",
-			},
-			StringInputDef{
-				name:         "pr_comment_event_path",
-				desc:         "File path to event payloads of the GitHub Action (note: required if enable_pr_comment is true)",
-				defaultValue: "/github/workflow/event.json",
 			},
 			BoolInputDef{
 				name:         "pr_comment_send_success",

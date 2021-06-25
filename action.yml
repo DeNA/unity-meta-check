@@ -12,7 +12,7 @@ inputs:
     default: "INFO"
 
   "target_path":
-    description: "Target directory path to check"
+    description: "Target directory path to check. Relative path is treated as a path from $GITHUB_WORKSPACE (default: .)"
     required: false
     default: "."
 
@@ -47,9 +47,9 @@ inputs:
     default: "false"
 
   "autofix_globs":
-    description: "Comma separated globs that match directories to where to allow autofix (note: required if enable_autofix is true)"
+    description: "Comma separated globs that match directories to where to allow autofix (example: use '*' to allow autofix all files, note: required if enable_autofix is true)"
     required: false
-    default: ""
+    default: "*"
 
   "enable_junit":
     description: "Enable JUnit-style reporting"
@@ -75,11 +75,6 @@ inputs:
     description: "File path to custom template file for GitHub Pull Request Comments (note: cannot specify both lang and pr_comment_tmpl_file)"
     required: false
     default: ""
-
-  "pr_comment_event_path":
-    description: "File path to event payloads of the GitHub Action (note: required if enable_pr_comment is true)"
-    required: false
-    default: "/github/workflow/event.json"
 
   "pr_comment_send_success":
     description: "Send a comment if no missing/dangling .meta found"

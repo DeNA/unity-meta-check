@@ -50,7 +50,6 @@ type Inputs struct {
 	EnablePRComment       StringifyBool     `json:"enable_pr_comment"`
 	PRCommentTmplFilePath typedpath.RawPath `json:"pr_comment_tmpl_file"`
 	PRCommentLang         string            `json:"pr_comment_lang"`
-	PRCommentEventPath    typedpath.RawPath `json:"pr_comment_event_path"`
 	PRCommentSendSuccess  StringifyBool     `json:"pr_comment_send_success"`
 }
 

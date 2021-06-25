@@ -39,7 +39,6 @@ func TestExample(t *testing.T) {
 		EnablePRComment:            true,
 		PRCommentTmplFilePath:      "",
 		PRCommentLang:              "ja",
-		PRCommentEventPath:         "/home/runner/work/_temp/_github_workflow/event.json",
 		PRCommentSendSuccess:       true,
 	}
 

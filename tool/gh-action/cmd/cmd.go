@@ -40,6 +40,8 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 		return cli.ExitNormal
 	}
 
+	actionEnv := inputs.GetActionEnv(env)
+
 	validate := runner.NewValidateFunc(
 		common.NewRootDirValidator(ostestable.NewIsDir()),
 		common.NewUnityProjectDetector(logger),
@@ -48,7 +50,7 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 		l10n.ReadTemplateFile,
 		inputs.ReadEventPayload,
 	)
-	runnerOpts, err := validate(opts.UnsafeInputs, opts.Token)
+	runnerOpts, err := validate(opts.UnsafeInputs, actionEnv)
 	if err != nil {
 		logger.Error(err.Error())
 		return cli.ExitAbnormal
