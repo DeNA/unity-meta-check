@@ -6,7 +6,7 @@ RUN make out/gh-action-linux-amd64 && mv ./out/gh-action-linux-amd64 ./out/gh-ac
 
 FROM debian:buster-slim
 RUN apt-get update \
-	&& apt-get install --yes --no-install-recommends git \
+	&& apt-get install --yes --no-install-recommends git ca-certificates \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 COPY --from=builder /go/src/unity-meta-check/out/* /usr/bin/
