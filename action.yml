@@ -79,7 +79,7 @@ inputs:
   "pr_comment_event_path":
     description: "File path to event payloads of the GitHub Action (note: required if enable_pr_comment is true)"
     required: false
-    default: "${{ github.event_path }}"
+    default: "/github/workflow/event.json"
 
   "pr_comment_send_success":
     description: "Send a comment if no missing/dangling .meta found"
