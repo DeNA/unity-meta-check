@@ -116,7 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: DeNA/unity-meta-check@github-actions
+      - uses: DeNA/unity-meta-check@3.0.0-alpha1
         with:
           enable_autofix: true
           autofix_globs: .
