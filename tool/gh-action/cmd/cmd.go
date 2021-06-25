@@ -34,6 +34,8 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 	}
 
 	logger := logging.NewLogger(logging.MustParseSeverity(opts.Inputs.LogLevel), procInout.Stderr)
+	logger.Debug(fmt.Sprintf("inputs=%#v", opts.Inputs))
+	logger.Debug(inputs.MaskedActionEnv(opts.Env))
 
 	if opts.Version {
 		_, _ = fmt.Fprintln(procInout.Stdout, version.Version)
@@ -53,6 +55,7 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 		logger.Error(err.Error())
 		return cli.ExitAbnormal
 	}
+	logger.Debug(fmt.Sprintf("runner options: %#v", runnerOpts))
 
 	// NOTE: dry run is not necessary on GitHub Actions.
 	dryRun := false
@@ -74,6 +77,7 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 			logger,
 		),
 		procInout.Stdout,
+		logger,
 	)
 	ok, err := run(runnerOpts)
 	if err != nil {

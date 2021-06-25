@@ -2,9 +2,11 @@ package github
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/l10n"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/markdown"
 	"github.com/DeNA/unity-meta-check/unity/checker"
+	"strings"
 )
 
 type Options struct {
@@ -34,4 +36,24 @@ func NewSendFunc(postComment PullRequestCommentSender) SendFunc {
 
 		return nil
 	}
+}
+
+func MaskOptions(opts *Options) string {
+	return fmt.Sprintf(`
+Tmpl=%#v
+SendIfSuccess=%t
+Token=%q (len=%d)
+APIEndpoint=%#v
+Owner=%q
+Repo=%q
+PullNumber=%d`[1:],
+		opts.Tmpl,
+		opts.SendIfSuccess,
+		strings.Repeat("*", len(opts.Token)),
+		len(opts.Token),
+		opts.APIEndpoint,
+		opts.Owner,
+		opts.Repo,
+		opts.PullNumber,
+	)
 }

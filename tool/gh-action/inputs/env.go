@@ -1,17 +1,19 @@
 package inputs
 
 import (
+	"fmt"
 	"github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/github"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
+	"strings"
 )
 
 type ActionEnv struct {
-	GitHubToken   github.Token
-	EventPath     typedpath.RawPath
-	Workspace     typedpath.RawPath
-	APIURL        string
+	GitHubToken github.Token
+	EventPath   typedpath.RawPath
+	Workspace   typedpath.RawPath
+	APIURL      string
 }
 
 // SEE: https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
@@ -35,9 +37,17 @@ func GetActionEnv(env cli.Env) ActionEnv {
 	apiURL := env(GitHubAPIURL)
 
 	return ActionEnv{
-		GitHubToken:   github.Token(gitHubToken),
-		EventPath:     typedpath.NewRawPathUnsafe(eventPath),
-		Workspace:     typedpath.NewRawPathUnsafe(workspace),
-		APIURL:        apiURL,
+		GitHubToken: github.Token(gitHubToken),
+		EventPath:   typedpath.NewRawPathUnsafe(eventPath),
+		Workspace:   typedpath.NewRawPathUnsafe(workspace),
+		APIURL:      apiURL,
 	}
+}
+
+func MaskedActionEnv(env ActionEnv) string {
+	return fmt.Sprintf(`
+TOKEN=%q (len=%d)
+GITHUB_EVENT_PATH=%q
+GITHUB_WORKSPACE=%q
+GITHUB_API_URL=%q`[1:], strings.Repeat("*", len(env.GitHubToken)), len(env.GitHubToken), env.EventPath, env.Workspace, env.APIURL)
 }
