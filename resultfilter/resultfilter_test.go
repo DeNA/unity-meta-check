@@ -5,6 +5,7 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/google/go-cmp/cmp"
 	"reflect"
@@ -13,11 +14,13 @@ import (
 
 func TestFilterResult(t *testing.T) {
 	cases := []struct {
+		Cwd      typedpath.RawPath
 		Result   *checker.CheckResult
 		Opts     *Options
 		Expected *checker.CheckResult
 	}{
 		{
+			Cwd: typedpath.NewRootRawPath("path", "to", "proj"),
 			Result: checker.NewCheckResult(
 				[]typedpath.SlashPath{},
 				[]typedpath.SlashPath{},
@@ -33,6 +36,7 @@ func TestFilterResult(t *testing.T) {
 		},
 
 		{
+			Cwd: typedpath.NewRootRawPath("path", "to", "proj"),
 			Result: checker.NewCheckResult(
 				[]typedpath.SlashPath{"Assets/Not/Added.meta"},
 				[]typedpath.SlashPath{},
@@ -100,7 +104,7 @@ func TestFilterResult(t *testing.T) {
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("%v %v -> %v", c.Result, c.Opts, c.Expected), func(t *testing.T) {
 			spyLogger := logging.SpyLogger()
-			filter := NewFilter(spyLogger)
+			filter := NewFilter(ostestable.StubGetwd(c.Cwd, nil), spyLogger)
 			actual, err := filter(c.Result, c.Opts)
 			if err != nil {
 				t.Errorf("want nil, got %#v", err)

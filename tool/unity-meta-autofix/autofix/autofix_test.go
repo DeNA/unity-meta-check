@@ -5,6 +5,7 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"path/filepath"
 	"testing"
@@ -75,7 +76,7 @@ func TestNewAutoFixer(t *testing.T) {
 			metaRemover := StubMetaRemover(nil)
 			spyLogger := logging.SpyLogger()
 
-			autofix := NewAutoFixer(c.DryRun, metaTypeDetector, metaCreator, metaRemover, spyLogger)
+			autofix := NewAutoFixer(c.DryRun, ostestable.NewGetwd(), metaTypeDetector, metaCreator, metaRemover, spyLogger)
 
 			err := autofix(c.Target, &Options{
 				RootDirAbs:   rootDirAbs(c.RootDirRel),

@@ -37,6 +37,7 @@ func NewMain() cli.Command {
 
 		autofixFunc := autofix.NewAutoFixer(
 			opts.DryRun,
+			ostestable.NewGetwd(),
 			autofix.NewMetaTypeDetector(ostestable.NewIsDir()),
 			autofix.NewMetaCreator(opts.DryRun, meta.RandomGUIDGenerator(), logger),
 			autofix.NewMetaRemover(opts.DryRun),
