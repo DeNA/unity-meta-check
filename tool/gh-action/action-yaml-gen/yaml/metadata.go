@@ -52,7 +52,7 @@ func BuildMetadata() GHActionsMetadata {
 			},
 			StringInputDef{
 				name:         "autofix_globs",
-				desc:         "Glob match directories to where to allow do autofix (note: required if enable_autofix is true)",
+				desc:         "Comma separated globs that match directories to where to allow autofix (note: required if enable_autofix is true)",
 				defaultValue: "",
 			},
 			BoolInputDef{

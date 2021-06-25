@@ -47,7 +47,7 @@ inputs:
     default: "false"
 
   "autofix_globs":
-    description: "Glob match directories to where to allow do autofix (note: required if enable_autofix is true)"
+    description: "Comma separated globs that match directories to where to allow autofix (note: required if enable_autofix is true)"
     required: false
     default: ""
 
