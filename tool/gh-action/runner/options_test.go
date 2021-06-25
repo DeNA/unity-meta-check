@@ -39,7 +39,7 @@ func TestNewValidateFunc(t *testing.T) {
 		Env                inputs.ActionEnv
 		DetectedTargetType checker.TargetType
 		BuiltIgnoredGlobs  []globs.Glob
-		ReadPayload        *inputs.PullRequestEventPayload
+		ReadPayload        *inputs.PushOrPullRequestEventPayload
 		ReadTmpl           *l10n.Template
 		Expected           *Options
 	}{
@@ -222,9 +222,9 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
-			ReadPayload: &inputs.PullRequestEventPayload{
-				PullRequest: inputs.PullRequest{Number: 2},
-				Repository: inputs.Repository{
+			ReadPayload: &inputs.PushOrPullRequestEventPayload{
+				PullRequest: &inputs.PullRequest{Number: 2},
+				Repository: &inputs.Repository{
 					Name:  "Hello-World",
 					Owner: inputs.User{Login: "Codertocat"},
 				},
@@ -274,9 +274,9 @@ func TestNewValidateFunc(t *testing.T) {
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			ReadTmpl:           tmpl,
-			ReadPayload: &inputs.PullRequestEventPayload{
-				PullRequest: inputs.PullRequest{Number: 2},
-				Repository: inputs.Repository{
+			ReadPayload: &inputs.PushOrPullRequestEventPayload{
+				PullRequest: &inputs.PullRequest{Number: 2},
+				Repository: &inputs.Repository{
 					Name:  "Hello-World",
 					Owner: inputs.User{Login: "Codertocat"},
 				},

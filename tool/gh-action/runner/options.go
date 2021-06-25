@@ -89,6 +89,15 @@ func NewValidateFunc(
 
 		var prcommentOps *prcomment.Options
 		if i.EnablePRComment {
+			eventPayload, err := readEventPayload(env.EventPath)
+			if err != nil {
+				return nil, err
+			}
+
+			if eventPayload.PullRequest == nil {
+				return nil, fmt.Errorf("pull request comment can work only if triggered by pull request events, but triggered a not pull request event")
+			}
+
 			var tmpl *l10n.Template
 			if i.PRCommentTmplFilePath == "" {
 				tmpl, err = l10n.GetTemplate(l10n.Lang(i.PRCommentLang))
@@ -103,11 +112,6 @@ func NewValidateFunc(
 				if err := l10n.ValidateTemplate(tmpl); err != nil {
 					return nil, err
 				}
-			}
-
-			eventPayload, err := readEventPayload(env.EventPath)
-			if err != nil {
-				return nil, err
 			}
 
 			apiEndpoint, err := url.Parse(env.APIURL)

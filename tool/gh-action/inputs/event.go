@@ -10,10 +10,10 @@ import (
 	"os"
 )
 
-type ReadEventPayloadFunc func(path typedpath.RawPath) (*PullRequestEventPayload, error)
+type ReadEventPayloadFunc func(path typedpath.RawPath) (*PushOrPullRequestEventPayload, error)
 
 func NewReadEventPayload(logger logging.Logger) ReadEventPayloadFunc {
-	return func(path typedpath.RawPath) (*PullRequestEventPayload, error) {
+	return func(path typedpath.RawPath) (*PushOrPullRequestEventPayload, error) {
 		payloadBytes, err := os.ReadFile(string(path))
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot read file: %q", path)
@@ -21,7 +21,7 @@ func NewReadEventPayload(logger logging.Logger) ReadEventPayloadFunc {
 
 		logger.Debug(fmt.Sprintf("event=%s", string(payloadBytes)))
 
-		var payload PullRequestEventPayload
+		var payload PushOrPullRequestEventPayload
 		if err := json.Unmarshal(payloadBytes, &payload); err != nil {
 			return nil, errors.Wrapf(err, "cannot decode file: %q\n%s", path, string(payloadBytes))
 		}
@@ -30,11 +30,11 @@ func NewReadEventPayload(logger logging.Logger) ReadEventPayloadFunc {
 	}
 }
 
-// PullRequestEventPayload is a payload for pull request events.
+// PushOrPullRequestEventPayload is a payload for pull request events.
 // SEE: https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#pull_request
-type PullRequestEventPayload struct {
-	PullRequest PullRequest `json:"pull_request"`
-	Repository  Repository  `json:"repository"`
+type PushOrPullRequestEventPayload struct {
+	PullRequest *PullRequest `json:"pull_request,omitempty"`
+	Repository  *Repository  `json:"repository,omitempty"`
 }
 
 // PullRequest is a payload for pull requests.
