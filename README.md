@@ -84,6 +84,62 @@ usage: unity-meta-check [<options>] [<path>]
 ```
 
 
+### Using GitHub Actions
+
+To check only, the following YAML can cover almost case:
+
+```yaml
+name: Meta Check
+on: pull_request
+
+jobs:
+  meta-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: DeNA/unity-meta-check@3.0.0-alpha1
+```
+
+See [`./action.yml`](./action.yml) for more detials.
+
+<details>
+<summary>Advanced Usage</summary>
+
+The following YAML is the example for JUnit report + Autofix + PR Comment report:
+
+```yaml
+name: Meta Check
+on: pull_request
+
+jobs:
+  unity-meta-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: DeNA/unity-meta-check@github-actions
+        with:
+          enable_autofix: true
+          autofix_globs: .
+          enable_junit: true
+          junit_xml_path: junit.xml
+          enable_pr_comment: true
+          pr_comment_lang: ja
+          pr_comment_send_success: true
+        env:
+          GITHUB_TOKEN: "${{ secrets.YOUR_GITHUB_TOKEN }}"
+
+      - name: See how autofix did
+        run: git status
+        if: always()
+
+      - uses: mikepenz/action-junit-report@v2
+        with:
+          report_paths: junit.xml
+        if: always()
+```
+</details>
+
+
 
 ### Using Git Submodules
 
@@ -237,10 +293,6 @@ OPTIONS
         set log level to DEBUG (default INFO)
   -dry-run
         dry run
-  -fix-dangling
-        fix dangling .meta
-  -fix-missing
-        fix missing .meta
   -root-dir string
         directory path to where unity-meta-check checked at (default ".")
   -silent
@@ -249,7 +301,7 @@ OPTIONS
         print version
 
 EXAMPLE USAGES
-  $ unity-meta-check <options> | unity-meta-autofix -dry-run -fix-missing -fix-dangling path/to/autofix
+  $ unity-meta-check <options> | unity-meta-autofix -dry-run path/to/autofix
   $ unity-meta-check <options> | unity-meta-autofix <options> | <other-unity-meta-check-tool>
 ```
 
