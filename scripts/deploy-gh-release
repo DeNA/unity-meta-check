@@ -58,7 +58,7 @@ main() {
 		echo-stderr
 		
 		echo-stderr "building executables..."
-		make clean test all
+		make clean all
 		echo-stderr
 
 		[[ -d "./out" ]] || throw "cannot find the generated distribution dir: '${BASE_DIR}/out'"
