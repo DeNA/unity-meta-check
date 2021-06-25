@@ -23,7 +23,7 @@ import (
 )
 
 func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus {
-	parse := options.NewParser(common.NewRootDirValidator(ostestable.NewIsDir()))
+	parse := options.NewParser()
 
 	opts, err := parse(args, procInout, env)
 	if err != nil {
@@ -41,13 +41,14 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 	}
 
 	validate := runner.NewValidateFunc(
+		common.NewRootDirValidator(ostestable.NewIsDir()),
 		common.NewUnityProjectDetector(logger),
 		common.NewIgnoredGlobsBuilder(logger),
 		autofix.NewOptionsBuilder(ostestable.NewGetwd()),
 		l10n.ReadTemplateFile,
 		inputs.ReadEventPayload,
 	)
-	runnerOpts, err := validate(opts.RootDirAbs, opts.UnsafeInputs, opts.Token)
+	runnerOpts, err := validate(opts.UnsafeInputs, opts.Token)
 	if err != nil {
 		logger.Error(err.Error())
 		return cli.ExitAbnormal

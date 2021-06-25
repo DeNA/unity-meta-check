@@ -33,8 +33,8 @@ func TestNewValidateFunc(t *testing.T) {
 	}
 
 	cases := map[string]struct {
-		RootDirAbs         typedpath.RawPath
 		RootDirRel         typedpath.RawPath
+		Cwd                typedpath.RawPath
 		Inputs             inputs.Inputs
 		Token              github.Token
 		DetectedTargetType checker.TargetType
@@ -44,10 +44,10 @@ func TestNewValidateFunc(t *testing.T) {
 		Expected           *Options
 	}{
 		"all default": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
 				TargetType: "auto-detect",
+				TargetPath: typedpath.NewRootRawPath("path", "to", "project"),
 			},
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{"ignore*"},
@@ -71,9 +71,9 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"ignore-case": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
+				TargetPath: typedpath.NewRootRawPath("path", "to", "project"),
 				TargetType: "auto-detect",
 				IgnoreCase: true,
 			},
@@ -99,9 +99,9 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"explicit unity-project": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
+				TargetPath: typedpath.NewRootRawPath("path", "to", "project"),
 				TargetType: "unity-project",
 			},
 			BuiltIgnoredGlobs: []globs.Glob{"ignore*"},
@@ -124,9 +124,10 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"explicit unity-project-sub-dir": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project", "Assets", "Foo"),
+			Cwd: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
+				TargetPath: typedpath.NewRawPath("Assets", "Foo"),
 				TargetType: "unity-project-sub-dir",
 			},
 			BuiltIgnoredGlobs: []globs.Glob{"ignore*"},
@@ -149,10 +150,11 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"explicit upm-package": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project", "Packages", "com.example.pkg"),
+			Cwd: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:   "INFO",
 				TargetType: "upm-package",
+				TargetPath: typedpath.NewRawPath("Packages", "com.example.pkg"),
 			},
 			BuiltIgnoredGlobs: []globs.Glob{"ignore*"},
 			Expected: &Options{
@@ -174,12 +176,12 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"enable junit": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:     "INFO",
+				TargetPath:   typedpath.NewRootRawPath("path", "to", "project"),
 				TargetType:   "auto-detect",
 				EnableJUnit:  true,
-				JUnitXMLPath: typedpath.NewRootRawPath("path", "to", "project", "junit.xml"),
+				JUnitXMLPath: typedpath.NewRawPath("junit.xml"),
 			},
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
@@ -198,19 +200,19 @@ func TestNewValidateFunc(t *testing.T) {
 					IgnoreCase:   false,
 				},
 				EnableJUnit:     true,
-				JUnitOutPath:    typedpath.NewRootRawPath("path", "to", "project", "junit.xml"),
+				JUnitOutPath:    typedpath.NewRawPath("junit.xml"),
 				EnablePRComment: false,
 				EnableAutofix:   false,
 			},
 		},
 		"enable pr-comment with lang": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:             "INFO",
+				TargetPath:           typedpath.NewRootRawPath("path", "to", "project"),
 				TargetType:           "auto-detect",
 				EnablePRComment:      true,
 				PRCommentLang:        "ja",
-				PRCommentEventPath:   typedpath.NewRootRawPath("github", "event.json"),
+				PRCommentEventPath:   typedpath.NewRootRawPath("github", "workflows", "event.json"),
 				PRCommentSendSuccess: true,
 			},
 			Token:              "T0K3N",
@@ -252,13 +254,13 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"enable pr-comment with a template file": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			Inputs: inputs.Inputs{
 				LogLevel:              "INFO",
+				TargetPath:            typedpath.NewRootRawPath("path", "to", "project"),
 				TargetType:            "auto-detect",
 				EnablePRComment:       true,
-				PRCommentTmplFilePath: "path/to/tmpl.json",
-				PRCommentEventPath:    typedpath.NewRootRawPath("github", "event.json"),
+				PRCommentTmplFilePath: typedpath.NewRawPath("tmpl.json"),
+				PRCommentEventPath:    typedpath.NewRootRawPath("github", "workflows", "event.json"),
 				PRCommentSendSuccess:  true,
 			},
 			Token:              "T0K3N",
@@ -301,10 +303,10 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 		},
 		"enable autofix": {
-			RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
 			RootDirRel: ".",
 			Inputs: inputs.Inputs{
 				LogLevel:      "INFO",
+				TargetPath:    typedpath.NewRootRawPath("path", "to", "project"),
 				TargetType:    "auto-detect",
 				EnableAutofix: true,
 				AutofixGlobs:  []string{"Assets/Allow/To/Fix/*"},
@@ -340,6 +342,7 @@ func TestNewValidateFunc(t *testing.T) {
 	for desc, c := range cases {
 		t.Run(desc, func(t *testing.T) {
 			validate := NewValidateFunc(
+				options.FakeRootDirValidator(c.Cwd),
 				options.StubUnityProjectDetector(c.DetectedTargetType, nil),
 				options.StubIgnoredPathBuilder(c.BuiltIgnoredGlobs, nil),
 				autofix.StubOptionsBuilderWithRootDirAbsAndRel(c.RootDirRel),
@@ -347,7 +350,7 @@ func TestNewValidateFunc(t *testing.T) {
 				inputs.StubReadEventPayload(c.ReadPayload, nil),
 			)
 
-			opts, err := validate(c.RootDirAbs, c.Inputs, c.Token)
+			opts, err := validate(c.Inputs, c.Token)
 			if err != nil {
 				t.Errorf("want nil, got %#v", err)
 				return

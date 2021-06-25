@@ -41,8 +41,8 @@ func (r RawPath) JoinRawPath(other RawPath) RawPath {
 	return RawPath(filepath.Join(string(r), string(other)))
 }
 
-func (r RawPath) JoinBaseName(other BaseName) RawPath {
-	return RawPath(filepath.Join(string(r), string(other)))
+func (r RawPath) JoinBaseName(others ...BaseName) RawPath {
+	return r.JoinRawPath(NewRawPath(others...))
 }
 
 func (r RawPath) IsAbs() bool {

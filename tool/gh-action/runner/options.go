@@ -28,17 +28,23 @@ type Options struct {
 	AutofixOpts     *autofix.Options
 }
 
-type Validator func(rootDirAbs typedpath.RawPath, i inputs.Inputs, token prcomment.Token) (*Options, error)
+type Validator func(i inputs.Inputs, token prcomment.Token) (*Options, error)
 
 func NewValidateFunc(
+	validateRootDirAbs options.RootDirAbsValidator,
 	detectTargetType options.UnityProjectDetector,
 	buildIgnoredGlobs options.IgnoredGlobsBuilder,
 	buildAutofixOpts autofix.OptionsBuilder,
 	readTmplFile l10n.TemplateFileReader,
 	readEventPayload inputs.ReadEventPayloadFunc,
 ) Validator {
-	return func(rootDirAbs typedpath.RawPath, i inputs.Inputs, token prcomment.Token) (*Options, error) {
+	return func(i inputs.Inputs, token prcomment.Token) (*Options, error) {
 		inputTargetType, err := inputs.ValidateTargetType(i.TargetType)
+		if err != nil {
+			return nil, err
+		}
+
+		rootDirAbs, err := validateRootDirAbs(i.TargetPath)
 		if err != nil {
 			return nil, err
 		}

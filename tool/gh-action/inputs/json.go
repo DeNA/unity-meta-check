@@ -34,6 +34,7 @@ func ValidateTargetType(unsafeTargetType string) (TargetType, error) {
 type Inputs struct {
 	LogLevel string `json:"log_level"`
 
+	TargetPath                typedpath.RawPath `json:"target_path"`
 	TargetType                string            `json:"target_type"`
 	IgnoreDangling            StringifyBool     `json:"ignore_dangling"`
 	IgnoreCase                StringifyBool     `json:"ignore_case"`

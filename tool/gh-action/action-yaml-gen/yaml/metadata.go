@@ -16,6 +16,11 @@ func BuildMetadata() GHActionsMetadata {
 				defaultValue: "INFO",
 			},
 			StringInputDef{
+				name:         "target_path",
+				desc:         "Target directory path to check",
+				defaultValue: "${{ github.workspace }}",
+			},
+			StringInputDef{
 				name:         "target_type",
 				desc:         "Target type for unity-meta-check (available: auto-detect/unity-project/unity-project-sub-dir/upm-package)",
 				defaultValue: "auto-detect",
@@ -90,8 +95,7 @@ func BuildMetadata() GHActionsMetadata {
 			Image: ImageWithTag(version.Version),
 			Args: []string{
 				`-inputs-json`,
-				`${{ toJSON(github.inputs) }}`,
-				`${{ github.workspace }}`,
+				`${{ toJSON(inputs) }}`,
 			},
 		},
 		BrandingIcon:  BrandingIconCheck,

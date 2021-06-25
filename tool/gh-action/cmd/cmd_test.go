@@ -14,7 +14,6 @@ import (
 func TestNewMain(t *testing.T) {
 	cases := map[string]struct {
 		Args     []string
-		Cwd      typedpath.SlashPath
 		Env      map[string]string
 		Expected cli.ExitStatus
 	}{
@@ -23,10 +22,9 @@ func TestNewMain(t *testing.T) {
 				"-inputs-json", string(MustMarshal(inputs.Inputs{
 					LogLevel:   "INFO",
 					TargetType: "auto-detect",
+					TargetPath: typedpath.NewRawPath("testdata", "ValidProject"),
 				})),
-				"testdata/ValidProject",
 			},
-			Cwd:      "/github/workspace",
 			Env:      map[string]string{"GITHUB_TOKEN": "T0K3N"},
 			Expected: cli.ExitNormal,
 		},
@@ -35,10 +33,9 @@ func TestNewMain(t *testing.T) {
 				"-inputs-json", string(MustMarshal(inputs.Inputs{
 					LogLevel:   "DEBUG",
 					TargetType: "auto-detect",
+					TargetPath: typedpath.NewRawPath("testdata", "InvalidProject"),
 				})),
-				"testdata/InvalidProject",
 			},
-			Cwd:      "/github/workspace",
 			Env:      map[string]string{"GITHUB_TOKEN": "T0K3N"},
 			Expected: cli.ExitAbnormal,
 		},
@@ -47,10 +44,9 @@ func TestNewMain(t *testing.T) {
 				"-inputs-json", string(MustMarshal(inputs.Inputs{
 					LogLevel:   "INFO",
 					TargetType: "auto-detect",
+					TargetPath: typedpath.NewRawPath("testdata", "ValidProject", "LocalPackages", "com.example.local.pkg"),
 				})),
-				"testdata/ValidProject/LocalPackages/com.example.local.pkg",
 			},
-			Cwd:      "/github/workspace",
 			Env:      map[string]string{"GITHUB_TOKEN": "T0K3N"},
 			Expected: cli.ExitNormal,
 		},
@@ -59,16 +55,14 @@ func TestNewMain(t *testing.T) {
 				"-inputs-json", string(MustMarshal(inputs.Inputs{
 					LogLevel:   "INFO",
 					TargetType: "auto-detect",
+					TargetPath: typedpath.NewRawPath("testdata", "InvalidProject", "LocalPackages", "com.example.local.pkg"),
 				})),
-				"testdata/InvalidProject/LocalPackages/com.example.local.pkg",
 			},
-			Cwd:      "/github/workspace",
 			Env:      map[string]string{"GITHUB_TOKEN": "T0K3N"},
 			Expected: cli.ExitAbnormal,
 		},
 		"-version": {
 			Args:     []string{"-version"},
-			Cwd:      "/path/to/cwd",
 			Env:      map[string]string{"GITHUB_TOKEN": "T0K3N"},
 			Expected: cli.ExitNormal,
 		},

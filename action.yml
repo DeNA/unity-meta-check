@@ -11,6 +11,11 @@ inputs:
     required: false
     default: "INFO"
 
+  "target_path":
+    description: "Target directory path to check"
+    required: false
+    default: "${{ github.workspace }}"
+
   "target_type":
     description: "Target type for unity-meta-check (available: auto-detect/unity-project/unity-project-sub-dir/upm-package)"
     required: false
@@ -87,7 +92,6 @@ runs:
   args:
     - "-inputs-json"
     - "${{ toJSON(inputs) }}"
-    - "${{ env.GITHUB_WORKSPACE }}"
 
 branding:
   icon: "check"
