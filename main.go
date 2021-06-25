@@ -11,6 +11,7 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/version"
 	"os"
 )
@@ -71,7 +72,7 @@ func NewMain() cli.Command {
 			return cli.ExitAbnormal
 		}
 
-		filterFunc := resultfilter.NewFilter(logger)
+		filterFunc := resultfilter.NewFilter(ostestable.NewGetwd(), logger)
 		filtered, err := filterFunc(result, &resultfilter.Options{
 			IgnoreDangling: opts.IgnoreDangling,
 			IgnoredGlobs:   opts.IgnoredPaths,

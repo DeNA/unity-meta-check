@@ -5,19 +5,26 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/ostestable"
 )
 
 type AutoFixer func(result *checker.CheckResult, opts *Options) error
 
-func NewAutoFixer(dryRun bool, detectMetaType MetaTypeDetector, createMeta MetaCreator, removeMeta MetaRemover, logger logging.Logger) AutoFixer {
+func NewAutoFixer(dryRun bool, getwd ostestable.Getwd, detectMetaType MetaTypeDetector, createMeta MetaCreator, removeMeta MetaRemover, logger logging.Logger) AutoFixer {
 	return func(result *checker.CheckResult, opts *Options) error {
 		if result.Empty() {
 			logger.Info("no missing or dangling .meta. nothing to do")
 			return nil
 		}
 
+		rawCwd, err := getwd()
+		if err != nil {
+			return err
+		}
+		cwd := rawCwd.ToSlash()
+
 		for _, missingMeta := range result.MissingMeta {
-			ok, matched, err := globs.MatchAny(missingMeta, opts.AllowedGlobs)
+			ok, matched, err := globs.MatchAny(missingMeta, opts.AllowedGlobs, cwd)
 			if err != nil {
 				return err
 			}
@@ -48,7 +55,7 @@ func NewAutoFixer(dryRun bool, detectMetaType MetaTypeDetector, createMeta MetaC
 		}
 
 		for _, danglingMeta := range result.DanglingMeta {
-			ok, matched, err := globs.MatchAny(danglingMeta, opts.AllowedGlobs)
+			ok, matched, err := globs.MatchAny(danglingMeta, opts.AllowedGlobs, cwd)
 			if err != nil {
 				return err
 			}

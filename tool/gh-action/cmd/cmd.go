@@ -62,11 +62,12 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 			checker.NewStrategySelector(unity.NewFindPackages(logger), git.NewLsFiles(logger), logger),
 			logger,
 		),
-		resultfilter.NewFilter(logger),
+		resultfilter.NewFilter(ostestable.NewGetwd(), logger),
 		junit.WriteToFile,
 		prcomment.NewSendFunc(prcomment.NewPullRequestCommentSender(prcomment.NewHttp(), logger)),
 		autofix.NewAutoFixer(
 			dryRun,
+			ostestable.NewGetwd(),
 			autofix.NewMetaTypeDetector(ostestable.NewIsDir()),
 			autofix.NewMetaCreator(dryRun, meta.RandomGUIDGenerator(), logger),
 			autofix.NewMetaRemover(dryRun),

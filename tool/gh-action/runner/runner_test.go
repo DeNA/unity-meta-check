@@ -11,6 +11,7 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"net/url"
 	"testing"
@@ -119,7 +120,7 @@ func TestNewRunner(t *testing.T) {
 
 			run := NewRunner(
 				checker.StubChecker(c.CheckResult, nil),
-				resultfilter.NewFilter(spyLogger),
+				resultfilter.NewFilter(ostestable.NewGetwd(), spyLogger),
 				junit.SpyWriteToFileFunc(junit.StubWriteToFileFunc(nil), &junitWriteToFileCallArgs),
 				github.SpySendFunc(github.StubSendFunc(nil), &sendFuncCallArgs),
 				autofix.SpyAutoFixer(autofix.StubAutoFixer(nil), &autoFixerCallArgs),
