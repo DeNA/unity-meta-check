@@ -40,7 +40,6 @@ type PullRequest struct {
 // Repository is a payload for repository.
 // SEE: https://docs.github.com/en/rest/reference/repos#get-a-repository
 type Repository struct {
-	URL   string      `json:"url"`
 	Name  github.Repo `json:"name"`
 	Owner User        `json:"owner"`
 }

@@ -36,7 +36,7 @@ func TestNewValidateFunc(t *testing.T) {
 		RootDirRel         typedpath.RawPath
 		Cwd                typedpath.RawPath
 		Inputs             inputs.Inputs
-		Token              github.Token
+		Env                inputs.ActionEnv
 		DetectedTargetType checker.TargetType
 		BuiltIgnoredGlobs  []globs.Glob
 		ReadPayload        *inputs.PullRequestEventPayload
@@ -212,16 +212,19 @@ func TestNewValidateFunc(t *testing.T) {
 				TargetType:           "auto-detect",
 				EnablePRComment:      true,
 				PRCommentLang:        "ja",
-				PRCommentEventPath:   typedpath.NewRootRawPath("github", "workflows", "event.json"),
 				PRCommentSendSuccess: true,
 			},
-			Token:              "T0K3N",
+			Env: inputs.ActionEnv{
+				GitHubToken: "T0K3N",
+				EventPath:   typedpath.NewRootRawPath("github", "workflow", "event.json"),
+				Workspace:   typedpath.NewRootRawPath("github", "workspace"),
+				APIURL:      "https://api.github.com",
+			},
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			ReadPayload: &inputs.PullRequestEventPayload{
 				PullRequest: inputs.PullRequest{Number: 2},
 				Repository: inputs.Repository{
-					URL:   "https://api.github.com/repos/Codertocat/Hello-World",
 					Name:  "Hello-World",
 					Owner: inputs.User{Login: "Codertocat"},
 				},
@@ -260,17 +263,20 @@ func TestNewValidateFunc(t *testing.T) {
 				TargetType:            "auto-detect",
 				EnablePRComment:       true,
 				PRCommentTmplFilePath: typedpath.NewRawPath("tmpl.json"),
-				PRCommentEventPath:    typedpath.NewRootRawPath("github", "workflows", "event.json"),
 				PRCommentSendSuccess:  true,
 			},
-			Token:              "T0K3N",
+			Env: inputs.ActionEnv{
+				GitHubToken: "T0K3N",
+				EventPath:   typedpath.NewRootRawPath("github", "workflow", "event.json"),
+				Workspace:   typedpath.NewRootRawPath("github", "workspace"),
+				APIURL:      "https://api.github.com",
+			},
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			ReadTmpl:           tmpl,
 			ReadPayload: &inputs.PullRequestEventPayload{
 				PullRequest: inputs.PullRequest{Number: 2},
 				Repository: inputs.Repository{
-					URL:   "https://api.github.com/repos/Codertocat/Hello-World",
 					Name:  "Hello-World",
 					Owner: inputs.User{Login: "Codertocat"},
 				},
@@ -350,7 +356,7 @@ func TestNewValidateFunc(t *testing.T) {
 				inputs.StubReadEventPayload(c.ReadPayload, nil),
 			)
 
-			opts, err := validate(c.Inputs, c.Token)
+			opts, err := validate(c.Inputs, c.Env)
 			if err != nil {
 				t.Errorf("want nil, got %#v", err)
 				return

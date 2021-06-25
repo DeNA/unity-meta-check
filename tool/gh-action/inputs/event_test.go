@@ -26,7 +26,6 @@ func TestEventPayload(t *testing.T) {
 			Number: 2,
 		},
 		Repository: Repository{
-			URL:   "https://api.github.com/repos/Codertocat/Hello-World",
 			Name:  "Hello-World",
 			Owner: User{Login: "Codertocat"},
 		},

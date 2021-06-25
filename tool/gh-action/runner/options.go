@@ -28,7 +28,7 @@ type Options struct {
 	AutofixOpts     *autofix.Options
 }
 
-type Validator func(i inputs.Inputs, token prcomment.Token) (*Options, error)
+type Validator func(i inputs.Inputs, env inputs.ActionEnv) (*Options, error)
 
 func NewValidateFunc(
 	validateRootDirAbs options.RootDirAbsValidator,
@@ -38,7 +38,7 @@ func NewValidateFunc(
 	readTmplFile l10n.TemplateFileReader,
 	readEventPayload inputs.ReadEventPayloadFunc,
 ) Validator {
-	return func(i inputs.Inputs, token prcomment.Token) (*Options, error) {
+	return func(i inputs.Inputs, env inputs.ActionEnv) (*Options, error) {
 		inputTargetType, err := inputs.ValidateTargetType(i.TargetType)
 		if err != nil {
 			return nil, err
@@ -105,25 +105,20 @@ func NewValidateFunc(
 				}
 			}
 
-			eventPayload, err := readEventPayload(i.PRCommentEventPath)
+			eventPayload, err := readEventPayload(env.EventPath)
 			if err != nil {
 				return nil, err
 			}
 
-			// XXX: Get API Endpoint URL via repository URL.
-			apiURLString := strings.TrimSuffix(
-				eventPayload.Repository.URL,
-				fmt.Sprintf("/repos/%s/%s", eventPayload.Repository.Owner.Login, eventPayload.Repository.Name),
-			)
-			apiEndpoint, err := url.Parse(apiURLString)
+			apiEndpoint, err := url.Parse(env.APIURL)
 			if err != nil {
-				return nil, errors.Wrapf(err, "malformed API endpoint URL: %q", apiURLString)
+				return nil, errors.Wrapf(err, "malformed API endpoint URL: %q", env.APIURL)
 			}
 
 			prcommentOps = &prcomment.Options{
 				Tmpl:          tmpl,
 				SendIfSuccess: bool(i.PRCommentSendSuccess),
-				Token:         token,
+				Token:         env.GitHubToken,
 				APIEndpoint:   apiEndpoint,
 				Owner:         eventPayload.Repository.Owner.Login,
 				Repo:          eventPayload.Repository.Name,
