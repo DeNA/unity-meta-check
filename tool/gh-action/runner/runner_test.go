@@ -125,6 +125,7 @@ func TestNewRunner(t *testing.T) {
 				github.SpySendFunc(github.StubSendFunc(nil), &sendFuncCallArgs),
 				autofix.SpyAutoFixer(autofix.StubAutoFixer(nil), &autoFixerCallArgs),
 				buf,
+				spyLogger,
 			)
 
 			ok, err := run(c.Options)
