@@ -18,12 +18,13 @@ error_help() {
 
 
 usage() {
-	echo 'usage: compat <old-unity-meta-check> <new-unity-meta-check> <workdir>'
+	echo 'usage: compat <old-unity-meta-check> <new-unity-meta-check> <workdir> <args>'
 	echo
 	echo 'ARGUMENTS'
-	echo '  <old-unity-meta-check>    path to old unity-meta-check executable'
-	echo '  <new-unity-meta-check>    path to new unity-meta-check executable'
+	echo '  <old-unity-meta-check>    absolute path to old unity-meta-check executable'
+	echo '  <new-unity-meta-check>    absolute path to new unity-meta-check executable'
 	echo '  <workdir>    path to directory where compatibility tests running on'
+	echo '  <args>       arguments for unity-meta-check to give to both old and new'
 	echo
 	echo 'EXAMPLES'
 	echo '  compat path/to/old/unity-meta-check path/to/new-unity-meta-check path/to/Unity/Project'
@@ -34,6 +35,7 @@ main() {
 	local old_bin="${1:-}"
 	local new_bin="${2:-}"
 	local work_dir="${3:-}"
+	shift 3
 
 	"$old_bin" -version >/dev/null || error_help "old binary does not exist: $old_bin"
 	"$new_bin" -version >/dev/null || error_help "new binary does not exist: $new_bin"
@@ -46,18 +48,18 @@ main() {
 		tmpdir="$(mktemp -d "/tmp/unity-meta-check-compat.XXXXXX")"
 
 		set +e
-		"$old_bin" > "${tmpdir}/old" 2>&1
+		"$old_bin" -silent "$@" > "${tmpdir}/old" 2>&1
 		local old_status=$?
 
-		"$new_bin" > "${tmpdir}/new" 2>&1
+		"$new_bin" -silent "$@" > "${tmpdir}/new" 2>&1
 		local new_status=$?
 		set -e
 
 		if [[ $old_status -eq $new_status ]]; then
-			echo "ok: match exit status ($old_status != $new_status)"
+			echo "ok: match exit status (old: $old_status == new: $new_status)"
 			rm -r "$tmpdir"
 		else
-			echo "ng: exit status mismatch ($old_status != $new_status)"
+			echo "ng: exit status mismatch (old: $old_status != new: $new_status)"
 			diff -u "${tmpdir}/old" "${tmpdir}/new"
 			false
 		fi
@@ -65,4 +67,10 @@ main() {
 }
 
 
-main "$@"
+case "$*" in
+	--help | -h)
+		usage
+		false ;;
+	*)
+		main "$@" ;;
+esac

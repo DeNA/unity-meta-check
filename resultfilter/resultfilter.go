@@ -5,6 +5,7 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 )
 
@@ -16,15 +17,19 @@ type Options struct {
 
 type Filter func(result *checker.CheckResult, opts *Options) (*checker.CheckResult, error)
 
-func NewFilter(logger logging.Logger) Filter {
+func NewFilter(getwd ostestable.Getwd, logger logging.Logger) Filter {
 	return func(result *checker.CheckResult, opts *Options) (*checker.CheckResult, error) {
 		var ignored bool
 		var matched globs.Glob
-		var err error
+		rawWd, err := getwd()
+		if err != nil {
+			return nil, err
+		}
+		wd := rawWd.ToSlash()
 
 		newMissingMeta := make([]typedpath.SlashPath, 0)
 		for _, missingMeta := range result.MissingMeta {
-			ignored, matched, err = globs.MatchAny(missingMeta, opts.IgnoredGlobs)
+			ignored, matched, err = globs.MatchAny(missingMeta, opts.IgnoredGlobs, wd)
 			if err != nil {
 				return nil, err
 			}
@@ -38,7 +43,7 @@ func NewFilter(logger logging.Logger) Filter {
 		newDanglingMeta := make([]typedpath.SlashPath, 0)
 		if !opts.IgnoreDangling {
 			for _, danglingMeta := range result.DanglingMeta {
-				ignored, matched, err = globs.MatchAny(danglingMeta, opts.IgnoredGlobs)
+				ignored, matched, err = globs.MatchAny(danglingMeta, opts.IgnoredGlobs, wd)
 				if err != nil {
 					return nil, err
 				}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/pkg/errors"
 	"os/exec"
 	"strings"
 )
@@ -24,7 +25,7 @@ func NewRevParse(logger logging.Logger) RevParse {
 		cmd.Stderr = stderrBuf
 
 		if err := cmd.Run(); err != nil {
-			return "", fmt.Errorf("%s\nStderr:\n%s", err.Error(), stderrBuf.String())
+			return "", errors.Wrapf(err, "failed to run git rev-parse:\nstderr:%s", stderrBuf.String())
 		}
 
 		return strings.TrimSpace(stdoutBuf.String()), nil

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/DeNA/unity-meta-check/util/cli"

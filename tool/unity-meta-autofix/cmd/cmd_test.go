@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/DeNA/unity-meta-check/util/cli"
@@ -19,7 +19,7 @@ func TestValidDryRun(t *testing.T) {
 	}
 
 	rootDir := filepath.Join("testdata", "ValidProject")
-	actual := main([]string{"-debug", "-dry-run", "-fix-missing", "-fix-dangling", "-root-dir", rootDir, "Assets/*"}, procInout, cli.AnyEnv())
+	actual := main([]string{"-debug", "-dry-run", "-root-dir", rootDir, "Assets/*"}, procInout, cli.AnyEnv())
 
 	expected := cli.ExitNormal
 	if actual != expected {
@@ -42,7 +42,7 @@ dangling Dangling.meta`),
 	}
 
 	rootDir := filepath.Join("testdata", "InvalidProject")
-	actual := main([]string{"-debug", "-dry-run", "-fix-missing", "-fix-dangling", "-root-dir", rootDir, "Assets/*"}, procInout, cli.AnyEnv())
+	actual := main([]string{"-debug", "-dry-run", "-root-dir", rootDir, "Assets/*"}, procInout, cli.AnyEnv())
 
 	expected := cli.ExitNormal
 	if actual != expected {

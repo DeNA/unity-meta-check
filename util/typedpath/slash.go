@@ -3,9 +3,10 @@ package typedpath
 import (
 	"path"
 	"path/filepath"
+	"strings"
 )
 
-// NOTE: It is slash separated path. Typically, Git uses the Slash Path.
+// SlashPath is slash separated path. Typically, Git uses the Slash Path.
 type SlashPath string
 
 func NewSlashPathUnsafe(path string) SlashPath {
@@ -26,6 +27,10 @@ func (s SlashPath) JoinSlashPath(other SlashPath) SlashPath {
 
 func (s SlashPath) JoinBaseName(other BaseName) SlashPath {
 	return SlashPath(path.Join(string(s), string(other)))
+}
+
+func (s SlashPath) IsAbs() bool {
+	return strings.HasPrefix(string(s), "/")
 }
 
 func (s SlashPath) Dir() SlashPath {

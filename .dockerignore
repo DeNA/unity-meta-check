@@ -1,6 +1,6 @@
 /.git
 /.gitignore
-/dist
+/out
 /test
 /tmp
 /Dockerfile

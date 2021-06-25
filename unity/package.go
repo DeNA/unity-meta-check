@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
+	"github.com/pkg/errors"
 	"os"
 	"strings"
 )
@@ -14,16 +15,17 @@ const LocalPkgPrefixLen = len(LocalPkgPrefix)
 
 type FindPackages func(projRoot typedpath.RawPath) ([]*FoundPackage, error)
 
-// Input:
-// "dependencies": {
-//   ...
-//   "com.my.pkg": "1.0.0"
-//   "com.my.local.pkg": "file:../MyLocalPkg/com.my.local.pkg"
-//   "com.my.another.local.pkg": "file:../MyLocalPkg/com.my.another.local.pkg"
-//   ...
-// }
+// NewFindPackages returns the dependencies field of manifest.json. For example,
+// 	Input:
+// 	"dependencies": {
+// 	  ...
+// 	  "com.my.pkg": "1.0.0"
+// 	  "com.my.local.pkg": "file:../MyLocalPkg/com.my.local.pkg"
+// 	  "com.my.another.local.pkg": "file:../MyLocalPkg/com.my.another.local.pkg"
+// 	  ...
+// 	}
 //
-// Output: []string{"Packages/com.my.pkg", "MyLocalPkg/com.my.local.pkg", "MyLocalPkg/com.my.another.local.pkg"}
+// 	Output: []string{"Packages/com.my.pkg", "MyLocalPkg/com.my.local.pkg", "MyLocalPkg/com.my.another.local.pkg"}
 func NewFindPackages(logger logging.Logger) FindPackages {
 	return func(rootDirAbs typedpath.RawPath) ([]*FoundPackage, error) {
 		if !rootDirAbs.IsAbs() {
@@ -65,8 +67,7 @@ func NewFindPackages(logger logging.Logger) FindPackages {
 			localPkgAbsRawPath := packagesDirAbsPath.JoinRawPath(typedpath.SlashPath(value[LocalPkgPrefixLen:]).ToRaw())
 			localPkgRelRawPath, err := rootDirAbs.Rel(localPkgAbsRawPath)
 			if err != nil {
-				logger.Error(fmt.Sprintf("cannot detect Local package location: %q", err.Error()))
-				return nil, err
+				return nil, errors.Wrapf(err, "cannot detect Local package location")
 			}
 			if _, err := os.Stat(string(localPkgAbsRawPath)); err != nil {
 				if os.IsNotExist(err) {

@@ -11,7 +11,7 @@ import (
 
 func TestNewIgnoredPathsBuilderSpecifiedAndIgnoreFileExists(t *testing.T) {
 	spyLogger := logging.SpyLogger()
-	buildIgnorePaths := NewIgnoredPathsBuilder(spyLogger)
+	buildIgnorePaths := NewIgnoredGlobsBuilder(spyLogger)
 
 	actual, err := buildIgnorePaths(
 		typedpath.NewRawPath("testdata", "ignorefile", "ProjectHasMetaCheckIgnore", ".meta-check-ignore"),
@@ -35,7 +35,7 @@ func TestNewIgnoredPathsBuilderSpecifiedAndIgnoreFileExists(t *testing.T) {
 
 func TestNewIgnoredPathsBuilderSpecifiedButIgnoreFileDoesNotExist(t *testing.T) {
 	spyLogger := logging.SpyLogger()
-	buildIgnorePaths := NewIgnoredPathsBuilder(spyLogger)
+	buildIgnorePaths := NewIgnoredGlobsBuilder(spyLogger)
 
 	_, err := buildIgnorePaths(
 		typedpath.NewRawPath("testdata", "ignorefile", "ProjectDoesNotHaveMetaCheckIgnore", ".meta-check-ignore"),
@@ -51,7 +51,7 @@ func TestNewIgnoredPathsBuilderSpecifiedButIgnoreFileDoesNotExist(t *testing.T) 
 
 func TestNewIgnoredPathsBuilderOmitButIgnoreFileExists(t *testing.T) {
 	spyLogger := logging.SpyLogger()
-	buildIgnorePaths := NewIgnoredPathsBuilder(spyLogger)
+	buildIgnorePaths := NewIgnoredGlobsBuilder(spyLogger)
 
 	actual, err := buildIgnorePaths(
 		"",
@@ -76,7 +76,7 @@ func TestNewIgnoredPathsBuilderOmitButIgnoreFileExists(t *testing.T) {
 
 func TestNewIgnoredPathsBuilderOmitAndIgnoreFileDoesNotExist(t *testing.T) {
 	spyLogger := logging.SpyLogger()
-	buildIgnorePaths := NewIgnoredPathsBuilder(spyLogger)
+	buildIgnorePaths := NewIgnoredGlobsBuilder(spyLogger)
 
 	actual, err := buildIgnorePaths(
 		"",

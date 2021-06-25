@@ -7,7 +7,9 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/logging"
+	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
+	"github.com/pkg/errors"
 )
 
 type ArgParser func(args []string, procInout cli.ProcessInout) (*Options, error)
@@ -17,9 +19,11 @@ var _ ArgParser = ParseArgs
 func ParseArgs(args []string, procInout cli.ProcessInout) (*Options, error) {
 	adhocLogger := logging.NewLogger(logging.SeverityWarn, procInout.Stderr)
 	builder := NewBuilder(
-		NewRootDirDetector(git.NewRevParse(adhocLogger), adhocLogger),
+		NewRootDirCompletion(git.NewRevParse(adhocLogger), adhocLogger),
 		NewUnityProjectDetector(adhocLogger),
-		NewIgnoredPathsBuilder(adhocLogger),
+		NewIgnoredGlobsBuilder(adhocLogger),
+		NewRootDirValidator(ostestable.NewIsDir()),
+		adhocLogger,
 	)
 	opts, err := builder(args, procInout)
 	if err != nil {
@@ -28,7 +32,13 @@ func ParseArgs(args []string, procInout cli.ProcessInout) (*Options, error) {
 	return opts, nil
 }
 
-func NewBuilder(detectRootDir RootDirDetector, detectUnityProj UnityProjectDetector, buildIgnoredPaths IgnoredPathsBuilder) ArgParser {
+func NewBuilder(
+	detectRootDir RootDirCompletion,
+	detectUnityProj UnityProjectDetector,
+	buildIgnoredGlobs IgnoredGlobsBuilder,
+	validateRootDirAbs RootDirAbsValidator,
+	logger logging.Logger,
+) ArgParser {
 	return func(args []string, procInout cli.ProcessInout) (*Options, error) {
 		var opts Options
 		flags := flag.NewFlagSet("unity-meta-check", flag.ContinueOnError)
@@ -83,25 +93,48 @@ EXAMPLE USAGES WITH OTHER TOOLS
 		logLevel := cli.GetLogLevel(debug, silent)
 		opts.LogLevel = logLevel
 
-		rootDirAbs, err := detectRootDir(flags.Args())
-		if err != nil {
-			return nil, err
+		var unsafeRootDir typedpath.RawPath
+		switch flags.NArg() {
+		case 0:
+			var err error
+			unsafeRootDir, err = detectRootDir()
+			if err != nil {
+				return nil, err
+			}
+		case 1:
+			unsafeRootDir = typedpath.NewRawPathUnsafe(flags.Arg(0))
+		default:
+			return nil, fmt.Errorf("want exactly 1 argument as a directory path to check, got %d arguments: %#v", flags.NArg(), flags.Args())
 		}
+
+		rootDirAbs, err := validateRootDirAbs(unsafeRootDir)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid root directory: %q", unsafeRootDir)
+		}
+
 		opts.RootDirAbs = rootDirAbs
 
 		opts.IgnoreCase = !noIgnoreCase
 
-		isUnityProj, err := detectUnityProj(unityProj, upmPkg, unityProjSubDir, rootDirAbs)
+		explicitTargetType, explicitTargetTypeOk, err := validateTargetTypeFlags(unityProj, unityProjSubDir, upmPkg)
 		if err != nil {
 			return nil, err
 		}
-		if isUnityProj {
-			opts.TargetType = checker.TargetTypeIsUnityProjectRootDirectory
-		} else {
-			opts.TargetType = checker.TargetTypeIsUnityProjectSubDirectory
-		}
 
-		ignoredPaths, err := buildIgnoredPaths(typedpath.NewRawPathUnsafe(ignoreFilePath), rootDirAbs)
+		var targetType checker.TargetType
+		if explicitTargetTypeOk {
+			targetType = explicitTargetType
+		} else {
+			logger.Info("none of -upm-package and -unity-project and -unity-project-sub-dir was specified, so try to detect it.")
+
+			targetType, err = detectUnityProj(rootDirAbs)
+			if err != nil {
+				return nil, err
+			}
+		}
+		opts.TargetType = targetType
+
+		ignoredPaths, err := buildIgnoredGlobs(typedpath.NewRawPathUnsafe(ignoreFilePath), rootDirAbs)
 		if err != nil {
 			return nil, err
 		}
@@ -111,4 +144,22 @@ EXAMPLE USAGES WITH OTHER TOOLS
 
 		return &opts, nil
 	}
+}
+
+func validateTargetTypeFlags(unityProj, unityProjSubDir, upmPkg bool) (checker.TargetType, bool, error) {
+	notUnityProj := upmPkg || unityProjSubDir
+
+	if notUnityProj && unityProj {
+		return "", false, errors.New("must specify one of -upm-package or -unity-project or -unity-project-sub-dir")
+	}
+
+	if notUnityProj {
+		return checker.TargetTypeIsUnityProjectSubDirectory, true, nil
+	}
+
+	if unityProj {
+		return checker.TargetTypeIsUnityProjectRootDirectory, true, nil
+	}
+
+	return "", false, nil
 }

@@ -4,3 +4,9 @@
 [submodule "testdata/InvalidProject"]
 	path = testdata/InvalidProject
 	url = https://github.com/DeNA/unity-meta-check-InvalidProject
+[submodule "tool/gh-action/cmd/testdata/ValidProject"]
+	path = tool/gh-action/cmd/testdata/ValidProject
+	url = https://github.com/DeNA/unity-meta-check-ValidProject
+[submodule "tool/gh-action/cmd/testdata/InvalidProject"]
+	path = tool/gh-action/cmd/testdata/InvalidProject
+	url = https://github.com/DeNA/unity-meta-check-InvalidProject

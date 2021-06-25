@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// NOTE: It is OS depended path. This style is for directly handling file systems.
+// RawPath is OS depended path. This style is for directly handling file systems.
 type RawPath string
 
 func NewRawPath(basenames ...BaseName) RawPath {
@@ -15,6 +15,10 @@ func NewRawPath(basenames ...BaseName) RawPath {
 		elements[i] = string(basename)
 	}
 	return RawPath(filepath.Join(elements...))
+}
+
+func NewRootRawPath(basenames ...BaseName) RawPath {
+	return NewRawPath(append([]BaseName{BaseName([]byte{os.PathSeparator})}, basenames...)...)
 }
 
 func NewRawPathUnsafe(path string) RawPath {
@@ -37,8 +41,8 @@ func (r RawPath) JoinRawPath(other RawPath) RawPath {
 	return RawPath(filepath.Join(string(r), string(other)))
 }
 
-func (r RawPath) JoinBaseName(other BaseName) RawPath {
-	return RawPath(filepath.Join(string(r), string(other)))
+func (r RawPath) JoinBaseName(others ...BaseName) RawPath {
+	return r.JoinRawPath(NewRawPath(others...))
 }
 
 func (r RawPath) IsAbs() bool {

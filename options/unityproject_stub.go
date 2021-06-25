@@ -1,9 +1,12 @@
 package options
 
-import "github.com/DeNA/unity-meta-check/util/typedpath"
+import (
+	"github.com/DeNA/unity-meta-check/unity/checker"
+	"github.com/DeNA/unity-meta-check/util/typedpath"
+)
 
-func StubUnityProjectDetector(result bool, err error) UnityProjectDetector {
-	return func(_, _, _ bool, _ typedpath.RawPath) (bool, error) {
+func StubUnityProjectDetector(result checker.TargetType, err error) UnityProjectDetector {
+	return func(_ typedpath.RawPath) (checker.TargetType, error) {
 		return result, err
 	}
 }

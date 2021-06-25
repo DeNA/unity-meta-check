@@ -1,34 +1,28 @@
 package options
 
 import (
-	"errors"
 	"fmt"
 	"github.com/DeNA/unity-meta-check/unity"
+	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
+	"github.com/pkg/errors"
 	"os"
 )
 
-type UnityProjectDetector func(unityProj, upmPkg, unityProjSubDir bool, rootDirAbs typedpath.RawPath) (bool, error)
+type UnityProjectDetector func(rootDirAbs typedpath.RawPath) (checker.TargetType, error)
 
 func NewUnityProjectDetector(logger logging.Logger) UnityProjectDetector {
-	return func(unityProj, upmPkg, unityProjSubDir bool, rootDirAbs typedpath.RawPath) (bool, error) {
-		notUnityProj := upmPkg || unityProjSubDir
-
-		if notUnityProj && unityProj {
-			return false, errors.New("must specify one of -upm-package or -unity-project or -unity-project-sub-dir")
+	return func(rootDirAbs typedpath.RawPath) (checker.TargetType, error) {
+		isUnityProj, err := hasUnityProjectSpecificDirectory(rootDirAbs, logger)
+		if err != nil {
+			return "", errors.Wrap(err, "automatic check mode detection was failed")
 		}
 
-		if !notUnityProj && !unityProj {
-			logger.Info("none of -upm-package and -unity-project and -unity-project-sub-dir was specified, so try to detect it.")
-			isUnityProj, err := hasUnityProjectSpecificDirectory(rootDirAbs, logger)
-			if err != nil {
-				return false, fmt.Errorf("automatic check mode detection was failed: %q", err.Error())
-			}
-			return isUnityProj, nil
+		if isUnityProj {
+			return checker.TargetTypeIsUnityProjectRootDirectory, nil
 		}
-
-		return unityProj, nil
+		return checker.TargetTypeIsUnityProjectSubDirectory, nil
 	}
 }
 

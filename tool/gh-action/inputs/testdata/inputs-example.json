@@ -1,0 +1,18 @@
+{
+  "log_level": "DEBUG",
+  "ignored_file_path": ".meta-check-ignore",
+  "enable_autofix": "true",
+  "autofix_globs": ".",
+  "enable_junit": "true",
+  "junit_xml_path": "junit.xml",
+  "enable_pr_comment": "true",
+  "pr_comment_lang": "ja",
+  "pr_comment_send_success": "true",
+  "target_path": "/home/runner/work/unity-meta-check-playground/unity-meta-check-playground",
+  "target_type": "auto-detect",
+  "ignore_dangling": "false",
+  "ignore_case": "false",
+  "ignore_submodules_and_nested": "false",
+  "pr_comment_tmpl_file": "",
+  "pr_comment_event_path": "/home/runner/work/_temp/_github_workflow/event.json"
+}

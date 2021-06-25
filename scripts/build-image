@@ -2,7 +2,9 @@
 set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
-IMAGE='docker.pkg.github.com/dena/unity-meta-check/unity-meta-check'
+DOCKERFILE="${BASE_DIR}/Dockerfile"
+GH_ACTION_DOCKERFILE="${BASE_DIR}/.github/images/Dockerfile"
+CIRCLECI_DOCKERFILE="${BASE_DIR}/.circleci/images/Dockerfile"
 
 
 usage() {
@@ -18,22 +20,42 @@ EOS
 
 main() {
 	local arg="${1:-}"
-	if [[ "$arg" == "-h" || "$arg" == "--help" || "$arg" == "help" ]]; then
-		usage
-		false
-	fi
 
 	(cd "$BASE_DIR"
 		local version
 		version="$("$BASE_DIR/scripts/print-version")"
 
-		docker build -t "$IMAGE:$version" .
+		local circleci_image
+		circleci_image="$("$BASE_DIR/scripts/print-image-name" < "$CIRCLECI_DOCKERFILE")"
 
+		local gh_action_image
+		gh_action_image="$("$BASE_DIR/scripts/print-image-name" < "$GH_ACTION_DOCKERFILE")"
+
+		local image
+		image="$("$BASE_DIR/scripts/print-image-name" < "$DOCKERFILE")"
+
+		docker build -t "$image:$version" -f "$DOCKERFILE" .
 		if [[ "$arg" == "--latest" ]]; then
-			docker tag "$IMAGE:$version" "$IMAGE:latest"
+			docker tag "$image:$version" "$image:latest"
+		fi
+
+		docker build -t "$gh_action_image:$version" -f "$GH_ACTION_DOCKERFILE" .
+		if [[ "$arg" == "--latest" ]]; then
+			docker tag "$gh_action_image:$version" "$gh_action_image:latest"
+		fi
+
+		docker build -t "$circleci_image:$version" -f "$CIRCLECI_DOCKERFILE" .
+		if [[ "$arg" == "--latest" ]]; then
+			docker tag "$circleci_image:$version" "$circleci_image:latest"
 		fi
 	)
 }
 
 
-main "$@"
+case "$*" in
+	--help | -h)
+		usage
+		false ;;
+	*)
+		main "$@" ;;
+esac

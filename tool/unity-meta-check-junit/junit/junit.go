@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+type WriteToFileFunc func(result *checker.CheckResult, startTime time.Time, outPath typedpath.RawPath) error
+
 func WriteToFile(result *checker.CheckResult, startTime time.Time, outPath typedpath.RawPath) error {
 	if err := os.MkdirAll(string(outPath.Dir()), 0755); err != nil {
 		return err

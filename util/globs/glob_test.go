@@ -1,41 +1,108 @@
 package globs
 
 import (
-	"fmt"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"testing"
 )
 
 func TestMatchAny(t *testing.T) {
-	cases := []struct {
-		Path typedpath.SlashPath
-		Globs []Glob
+	cases := map[string]struct {
+		Path     typedpath.SlashPath
+		Globs    []Glob
+		Cwd      typedpath.SlashPath
 		Expected bool
-	} {
-		{
-			Path: "path/to/file",
-			Globs : []Glob{},
+	}{
+		"empty globs (boundary case)": {
+			Path:     "path/to/file",
+			Cwd:      "/cwd",
+			Globs:    []Glob{},
 			Expected: false,
 		},
-		{
+		"easiest case": {
 			Path: "path/to/file",
-			Globs : []Glob{
+			Cwd:  "/cwd",
+			Globs: []Glob{
 				"path",
 			},
 			Expected: true,
 		},
-		{
+		"asterisk pattern": {
 			Path: "path/to/file",
-			Globs : []Glob{
+			Cwd:  "/cwd",
+			Globs: []Glob{
 				"path/*",
+			},
+			Expected: true,
+		},
+		"only dot (edge case)": {
+			Path: "path/to/file",
+			Cwd:  "/cwd",
+			Globs: []Glob{
+				".",
+			},
+			Expected: true,
+		},
+		"only asterisk (edge case)": {
+			Path: "path/to/file",
+			Cwd:  "/cwd",
+			Globs: []Glob{
+				"*",
+			},
+			Expected: true,
+		},
+		"dot asterisk (edge case)": {
+			Path: "path/to/file",
+			Cwd:  "/cwd",
+			Globs: []Glob{
+				"./*",
+			},
+			Expected: true,
+		},
+		"empty glob (edge case)": {
+			Path: "path/to/file",
+			Cwd:  "/cwd",
+			Globs: []Glob{
+				"",
+			},
+			Expected: true,
+		},
+		"only asterisk not match absolute path because the glob based on relative": {
+			Path: "/path/to/file",
+			Cwd:  "/cwd",
+			Globs: []Glob{
+				"*",
+			},
+			Expected: false,
+		},
+		"empty glob not match absolute path because the glob based on relative": {
+			Path: "/path/to/file",
+			Cwd:  "/cwd",
+			Globs: []Glob{
+				"",
+			},
+			Expected: false,
+		},
+		"only dot not match absolute path": {
+			Path: "/path/to/file",
+			Cwd:  "/cwd",
+			Globs: []Glob{
+				".",
+			},
+			Expected: false,
+		},
+		"slash asterisk match absolute path": {
+			Path: "/path/to/file",
+			Cwd:  "/cwd",
+			Globs: []Glob{
+				"/*",
 			},
 			Expected: true,
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(fmt.Sprintf("%q, %v -> %t", c.Path, c.Globs, c.Expected), func(t *testing.T) {
-			actual, _, err := MatchAny(c.Path, c.Globs)
+	for desc, c := range cases {
+		t.Run(desc, func(t *testing.T) {
+			actual, _, err := MatchAny(c.Path, c.Globs, c.Cwd)
 			if err != nil {
 				t.Errorf("want nil, got %#v", err)
 				return

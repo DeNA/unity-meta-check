@@ -8,18 +8,31 @@ import (
 
 type Glob string
 
-func MatchAny(p typedpath.SlashPath, globs []Glob) (bool, Glob, error) {
-	ancestors := pathutil.AllAncestorsAndSelf(p)
+func (g Glob) ToSlash() typedpath.SlashPath {
+	return typedpath.NewSlashPathUnsafe(string(g))
+}
+
+func MatchAny(p typedpath.SlashPath, globs []Glob, cwd typedpath.SlashPath) (bool, Glob, error) {
+	pAbs := joinCwdIfRel(cwd, p)
+	ancestors := pathutil.AllAncestorsAndSelf(pAbs)
 	for _, ancestor := range ancestors {
-		for _, glob := range globs {
+		for _, relGlob := range globs {
+			glob := joinCwdIfRel(cwd, relGlob.ToSlash())
 			ok, err := path.Match(string(glob), string(ancestor))
 			if err != nil {
 				return false, "", err
 			}
 			if ok {
-				return true, glob, nil
+				return true, relGlob, nil
 			}
 		}
 	}
 	return false, "", nil
+}
+
+func joinCwdIfRel(cwd typedpath.SlashPath, path typedpath.SlashPath) typedpath.SlashPath {
+	if path.IsAbs() {
+		return path
+	}
+	return cwd.JoinSlashPath(path)
 }

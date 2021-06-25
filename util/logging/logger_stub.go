@@ -5,26 +5,6 @@ import (
 	"fmt"
 )
 
-// WHY: It is an exposed API.
-//goland:noinspection GoUnusedExportedFunction
-func NullLogger() Logger {
-	return nullLogger{}
-}
-
-type nullLogger struct{}
-
-var _ Logger = nullLogger{}
-
-func (nullLogger) Debug(string) {}
-
-func (nullLogger) Info(string) {}
-
-func (nullLogger) Warn(string) {}
-
-func (nullLogger) Error(string) {}
-
-func (nullLogger) Log(Severity, string) {}
-
 func SpyLogger() *LoggerSpy {
 	return &LoggerSpy{
 		Logs: &bytes.Buffer{},

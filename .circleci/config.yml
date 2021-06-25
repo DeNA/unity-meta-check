@@ -12,39 +12,11 @@ jobs:
           name: Test
           command: unity-meta-check --version
 
-  test-linux:
-    docker:
-      - image: cimg/go:1.16
-
-    steps:
-      - checkout
-      - run:
-          name: Test on Linux
-          command: |
-            git submodule update --init --recursive
-            go test -v ./...
-
-  # test-windows:
-  #   resource_class: windows.medium
-  #   machine:
-  #     image: windows-default
-  #
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Test on Windows
-  #         command: |
-  #           git submodule update --init --recursive
-  #           go test -v ./...
-  #         shell: bash.exe
-
 workflows:
   version: 2
 
-  test-linux-and-windows:
+  main:
     jobs:
-      - test-linux
-      # - test-windows
       - go_get:
           filters:
             branches:
