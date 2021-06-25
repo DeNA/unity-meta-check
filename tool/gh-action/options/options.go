@@ -4,17 +4,15 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/tool/gh-action/inputs"
-	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/github"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/pkg/errors"
 )
 
 type Options struct {
-	Version      bool
-	UnsafeInputs inputs.Inputs
-	Token        github.Token
+	Version bool
+	Inputs  inputs.Inputs
+	Env     inputs.ActionEnv
 }
 
 type Parser func(args []string, procInout cli.ProcessInout, env cli.Env) (*Options, error)
@@ -48,14 +46,9 @@ func NewParser() Parser {
 			return nil, errors.Wrapf(err, "malformed JSON of inputs:\n%q", *inputsJSON)
 		}
 
-		token, err := github.ValidateToken(env(options.GitHubTokenEnv))
-		if err != nil {
-			return nil, errors.Wrapf(err, "invalid environment variable: %s", options.GitHubTokenEnv)
-		}
-
 		return &Options{
-			UnsafeInputs: unsafeInputs,
-			Token:        token,
+			Inputs: unsafeInputs,
+			Env:    inputs.GetActionEnv(env),
 		}, nil
 	}
 }
