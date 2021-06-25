@@ -14,7 +14,7 @@ inputs:
   "target_path":
     description: "Target directory path to check"
     required: false
-    default: "${{ github.workspace }}"
+    default: "."
 
   "target_type":
     description: "Target type for unity-meta-check (available: auto-detect/unity-project/unity-project-sub-dir/upm-package)"

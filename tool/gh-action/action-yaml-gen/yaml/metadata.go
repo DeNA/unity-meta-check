@@ -18,7 +18,7 @@ func BuildMetadata() GHActionsMetadata {
 			StringInputDef{
 				name:         "target_path",
 				desc:         "Target directory path to check",
-				defaultValue: "${{ github.workspace }}",
+				defaultValue: ".",
 			},
 			StringInputDef{
 				name:         "target_type",
