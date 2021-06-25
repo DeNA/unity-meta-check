@@ -56,10 +56,10 @@ main() {
 		set -e
 
 		if [[ $old_status -eq $new_status ]]; then
-			echo "ok: match exit status ($old_status == $new_status)"
+			echo "ok: match exit status (old: $old_status == new: $new_status)"
 			rm -r "$tmpdir"
 		else
-			echo "ng: exit status mismatch ($old_status != $new_status)"
+			echo "ng: exit status mismatch (old: $old_status != new: $new_status)"
 			diff -u "${tmpdir}/old" "${tmpdir}/new"
 			false
 		fi
