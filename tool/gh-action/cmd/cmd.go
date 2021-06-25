@@ -48,7 +48,7 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 		common.NewIgnoredGlobsBuilder(logger),
 		autofix.NewOptionsBuilder(ostestable.NewGetwd()),
 		l10n.ReadTemplateFile,
-		inputs.ReadEventPayload,
+		inputs.NewReadEventPayload(logger),
 	)
 	runnerOpts, err := validate(opts.Inputs, opts.Env)
 	if err != nil {
