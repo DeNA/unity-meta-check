@@ -30,13 +30,13 @@ func NewParser(validateRootDirAbs options.RootDirAbsValidator) Parser {
 		flags := flag.NewFlagSet("unity-meta-autofix", flag.ContinueOnError)
 		flags.SetOutput(procInout.Stderr)
 		flags.Usage = func() {
-			_, _ = fmt.Fprint(procInout.Stderr, `usage: unity-meta-autofix [<Options>] <pattern> [<pattern>...]
+			_, _ = fmt.Fprint(procInout.Stderr, `usage: unity-meta-autofix [<options>] <pattern> [<pattern>...]
 
 Fix missing or dangling .meta. Currently autofix is only limited support.
 
 ARGUMENTS
   <pattern>
-        glob pattern to path where autofix allowed on
+        glob pattern to path where autofix allowed on.
 
 OPTIONS
 `)
@@ -44,14 +44,14 @@ OPTIONS
 
 			_, _ = fmt.Fprint(procInout.Stderr, `
 EXAMPLE USAGES
-  $ unity-meta-check <Options> | unity-meta-autofix -dry-run -fix-missing -fix-dangling path/to/autofix
-  $ unity-meta-check <Options> | unity-meta-autofix <Options> | <other-unity-meta-check-tool>
+  $ unity-meta-check <options> | unity-meta-autofix -dry-run path/to/autofix
+  $ unity-meta-check <options> | unity-meta-autofix <options> | <other-unity-meta-check-tool>
 `)
 		}
 
 		var silent, debug bool
 		var rootDir string
-		flags.BoolVar(&opts.Version, "version", false, "print Version")
+		flags.BoolVar(&opts.Version, "version", false, "print version")
 		flags.BoolVar(&debug, "debug", false, "set log level to DEBUG (default INFO)")
 		flags.BoolVar(&silent, "silent", false, "set log level to WARN (default INFO)")
 		flags.BoolVar(&opts.DryRun, "dry-run", false, "dry run")
