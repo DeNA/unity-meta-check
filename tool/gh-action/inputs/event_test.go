@@ -9,28 +9,51 @@ import (
 )
 
 func TestEventPayload(t *testing.T) {
-	jsonBytes, err := os.ReadFile("./testdata/webhook-payload-example.json")
-	if err != nil {
-		t.Errorf("want nil, got %#v", err)
-		return
+	cases := map[string]struct {
+		Path     string
+		Expected PushOrPullRequestEventPayload
+	}{
+		"pull request": {
+			Path: "./testdata/pr-event-payload-example.json",
+			Expected: PushOrPullRequestEventPayload{
+				PullRequest: &PullRequest{
+					Number: 2,
+				},
+				Repository: &Repository{
+					Name:  "Hello-World",
+					Owner: User{Login: "Codertocat"},
+				},
+			},
+		},
+		"push": {
+			Path: "./testdata/push-event-payload-example.json",
+			Expected: PushOrPullRequestEventPayload{
+				PullRequest: nil,
+				Repository: &Repository{
+					Name:  "Hello-World",
+					Owner: User{Login: "Codertocat"},
+				},
+			},
+		},
 	}
 
-	var payload PullRequestEventPayload
-	if err := json.Unmarshal(jsonBytes, &payload); err != nil {
-		t.Errorf("want nil, got %#v", err)
-		return
-	}
+	for desc, c := range cases {
+		t.Run(desc, func(t *testing.T) {
+			jsonBytes, err := os.ReadFile(c.Path)
+			if err != nil {
+				t.Errorf("want nil, got %#v", err)
+				return
+			}
 
-	expected := PullRequestEventPayload{
-		PullRequest: PullRequest{
-			Number: 2,
-		},
-		Repository: Repository{
-			Name:  "Hello-World",
-			Owner: User{Login: "Codertocat"},
-		},
-	}
-	if !reflect.DeepEqual(payload, expected) {
-		t.Error(cmp.Diff(expected, payload))
+			var payload PushOrPullRequestEventPayload
+			if err := json.Unmarshal(jsonBytes, &payload); err != nil {
+				t.Errorf("want nil, got %#v", err)
+				return
+			}
+
+			if !reflect.DeepEqual(payload, c.Expected) {
+				t.Error(cmp.Diff(c.Expected, payload))
+			}
+		})
 	}
 }
