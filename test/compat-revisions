@@ -26,7 +26,8 @@ usage() {
 	echo '  <old-unity-meta-check>    absolute path to old unity-meta-check executable'
 	echo '  <new-unity-meta-check>    absolute path to new unity-meta-check executable'
 	echo '  <workdir>    path to directory where compatibility tests running on'
-	echo '  <num>        number of revisions from HEAD to test (default 10)'
+	echo '  <num>        number of revisions from HEAD to test (default: 10)'
+	echo '  <args>       arguments for unity-meta-check to give to both old and new'
 	echo
 	echo 'EXAMPLES'
 	echo '  compat-revisions path/to/old/unity-meta-check path/to/new-unity-meta-check path/to/Unity/Project 100'
@@ -38,6 +39,7 @@ main() {
 	local new_bin="${2:-}"
 	local work_dir="${3:-}"
 	local num="${4:-10}"
+	shift 4
 
 	"$old_bin" -version >/dev/null || error_help "old binary does not exist: $old_bin"
 	"$new_bin" -version >/dev/null || error_help "new binary does not exist: $new_bin"
@@ -51,7 +53,7 @@ main() {
 			git checkout --quiet "$rev"
 			printf "%s: " "$rev"
 
-			if ! "${BASE_DIR}/compat" "$old_bin" "$new_bin" "$work_dir"; then
+			if ! "${BASE_DIR}/compat" "$old_bin" "$new_bin" "$work_dir" "$@"; then
 				failed=1
 			fi
 		done < <(git rev-list -n "$num" HEAD)
