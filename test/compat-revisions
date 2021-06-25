@@ -51,7 +51,7 @@ main() {
 		local failed=0
 		while read -r rev; do
 			git checkout --quiet "$rev"
-			git submodule sync
+			git submodule sync --quiet
 			git submodule update --quiet --init --recursive
 			printf "%s: " "$rev"
 
