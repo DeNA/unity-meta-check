@@ -2,7 +2,9 @@ package inputs
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/github"
+	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/pkg/errors"
 	"os"
@@ -10,18 +12,22 @@ import (
 
 type ReadEventPayloadFunc func(path typedpath.RawPath) (*PullRequestEventPayload, error)
 
-func ReadEventPayload(path typedpath.RawPath) (*PullRequestEventPayload, error) {
-	payloadBytes, err := os.ReadFile(string(path))
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot read file: %q", path)
-	}
+func NewReadEventPayload(logger logging.Logger) ReadEventPayloadFunc {
+	return func(path typedpath.RawPath) (*PullRequestEventPayload, error) {
+		payloadBytes, err := os.ReadFile(string(path))
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot read file: %q", path)
+		}
 
-	var payload PullRequestEventPayload
-	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
-		return nil, errors.Wrapf(err, "cannot decode file: %q\n%s", path, string(payloadBytes))
-	}
+		logger.Debug(fmt.Sprintf("event=%s", string(payloadBytes)))
 
-	return &payload, nil
+		var payload PullRequestEventPayload
+		if err := json.Unmarshal(payloadBytes, &payload); err != nil {
+			return nil, errors.Wrapf(err, "cannot decode file: %q\n%s", path, string(payloadBytes))
+		}
+
+		return &payload, nil
+	}
 }
 
 // PullRequestEventPayload is a payload for pull request events.
