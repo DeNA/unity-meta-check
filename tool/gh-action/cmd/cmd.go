@@ -33,14 +33,12 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 		return cli.ExitAbnormal
 	}
 
-	logger := logging.NewLogger(logging.MustParseSeverity(opts.UnsafeInputs.LogLevel), procInout.Stderr)
+	logger := logging.NewLogger(logging.MustParseSeverity(opts.Inputs.LogLevel), procInout.Stderr)
 
 	if opts.Version {
 		_, _ = fmt.Fprintln(procInout.Stdout, version.Version)
 		return cli.ExitNormal
 	}
-
-	actionEnv := inputs.GetActionEnv(env)
 
 	validate := runner.NewValidateFunc(
 		common.NewRootDirValidator(ostestable.NewIsDir()),
@@ -50,7 +48,7 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 		l10n.ReadTemplateFile,
 		inputs.ReadEventPayload,
 	)
-	runnerOpts, err := validate(opts.UnsafeInputs, actionEnv)
+	runnerOpts, err := validate(opts.Inputs, opts.Env)
 	if err != nil {
 		logger.Error(err.Error())
 		return cli.ExitAbnormal

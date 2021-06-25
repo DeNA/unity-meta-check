@@ -5,6 +5,7 @@ import (
 	"github.com/DeNA/unity-meta-check/tool/gh-action/inputs"
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/testutil"
+	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/google/go-cmp/cmp"
 	"io"
 	"reflect"
@@ -27,10 +28,20 @@ func TestParse(t *testing.T) {
 	}{
 		"easiest case": {
 			Args: []string{"-inputs-json", string(inputsJson)},
-			Env:  map[string]string{"GITHUB_TOKEN": "T0K3N"},
+			Env: map[string]string{
+				"GITHUB_TOKEN":      "T0K3N",
+				"GITHUB_WORKSPACE":  string(typedpath.NewRootRawPath("github", "workspace")),
+				"GITHUB_EVENT_PATH": string(typedpath.NewRootRawPath("github", "workflows", "event.json")),
+				"GITHUB_API_URL":    "https://api.github.com",
+			},
 			Expected: &Options{
-				UnsafeInputs: in,
-				Token:        "T0K3N",
+				Inputs: in,
+				Env: inputs.ActionEnv{
+					GitHubToken: "T0K3N",
+					Workspace:   typedpath.NewRootRawPath("github", "workspace"),
+					EventPath:   typedpath.NewRootRawPath("github", "workflows", "event.json"),
+					APIURL:      "https://api.github.com",
+				},
 			},
 		},
 		"-version": {

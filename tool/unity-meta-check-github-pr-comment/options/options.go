@@ -3,6 +3,7 @@ package options
 import (
 	"flag"
 	"fmt"
+	"github.com/DeNA/unity-meta-check/options"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/github"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/l10n"
 	"github.com/DeNA/unity-meta-check/tool/unity-meta-check-github-pr-comment/markdown"
@@ -122,7 +123,7 @@ or:
 
 	opts.LogLevel = cli.GetLogLevel(debug, silent)
 
-	token, err := github.ValidateToken(env("GITHUB_TOKEN"))
+	token, err := github.ValidateToken(env(options.GitHubTokenEnv))
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid GITHUB_TOKEN: %s")
 	}
