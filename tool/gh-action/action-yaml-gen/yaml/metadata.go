@@ -83,7 +83,7 @@ func BuildMetadata() GHActionsMetadata {
 			StringInputDef{
 				name:         "pr_comment_event_path",
 				desc:         "File path to event payloads of the GitHub Action (note: required if enable_pr_comment is true)",
-				defaultValue: "${{ github.event_path }}",
+				defaultValue: "/github/workflow/event.json",
 			},
 			BoolInputDef{
 				name:         "pr_comment_send_success",
