@@ -305,11 +305,11 @@ func TestNewValidateFunc(t *testing.T) {
 		"enable autofix": {
 			RootDirRel: ".",
 			Inputs: inputs.Inputs{
-				LogLevel:      "INFO",
-				TargetPath:    typedpath.NewRootRawPath("path", "to", "project"),
-				TargetType:    "auto-detect",
-				EnableAutofix: true,
-				AutofixGlobs:  []string{"Assets/Allow/To/Fix/*"},
+				LogLevel:                   "INFO",
+				TargetPath:                 typedpath.NewRootRawPath("path", "to", "project"),
+				TargetType:                 "auto-detect",
+				EnableAutofix:              true,
+				CommaSeparatedAutofixGlobs: "Assets/Allow/To/Fix1/*,Assets/Allow/To/Fix2/*",
 			},
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
@@ -333,7 +333,7 @@ func TestNewValidateFunc(t *testing.T) {
 				AutofixOpts: &autofix.Options{
 					RootDirAbs:   typedpath.NewRootRawPath("path", "to", "project"),
 					RootDirRel:   ".",
-					AllowedGlobs: []globs.Glob{"Assets/Allow/To/Fix/*"},
+					AllowedGlobs: []globs.Glob{"Assets/Allow/To/Fix1/*", "Assets/Allow/To/Fix2/*"},
 				},
 			},
 		},

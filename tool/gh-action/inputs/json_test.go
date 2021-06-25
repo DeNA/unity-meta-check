@@ -3,11 +3,50 @@ package inputs
 import (
 	"encoding/json"
 	"github.com/DeNA/unity-meta-check/tool/gh-action/action-yaml-gen/yaml"
+	"github.com/google/go-cmp/cmp"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
 	"testing/quick"
 )
+
+func TestExample(t *testing.T) {
+	exampleBytes, err := os.ReadFile("testdata/inputs-example.json")
+	if err != nil {
+		t.Errorf("want nil, got %#v", err)
+		return
+	}
+
+	var in Inputs
+	if err := json.Unmarshal(exampleBytes, &in); err != nil {
+		t.Errorf("want nil, got %#v", err)
+		return
+	}
+
+	expected := Inputs{
+		LogLevel:                   "DEBUG",
+		TargetPath:                 "/home/runner/work/unity-meta-check-playground/unity-meta-check-playground",
+		TargetType:                 "auto-detect",
+		IgnoreDangling:             false,
+		IgnoreCase:                 false,
+		IgnoreSubmodulesAndNested:  false,
+		IgnoredFilePath:            ".meta-check-ignore",
+		EnableAutofix:              true,
+		CommaSeparatedAutofixGlobs: ".",
+		EnableJUnit:                true,
+		JUnitXMLPath:               "junit.xml",
+		EnablePRComment:            true,
+		PRCommentTmplFilePath:      "",
+		PRCommentLang:              "ja",
+		PRCommentEventPath:         "/home/runner/work/_temp/_github_workflow/event.json",
+		PRCommentSendSuccess:       true,
+	}
+
+	if !reflect.DeepEqual(expected, in) {
+		t.Error(cmp.Diff(expected, in))
+	}
+}
 
 func TestInputDefsCoverInput(t *testing.T) {
 	inputJSONFieldNameMap, missingJSONTags := buildInputJSONFieldNameMap()

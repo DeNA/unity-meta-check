@@ -41,8 +41,8 @@ type Inputs struct {
 	IgnoreSubmodulesAndNested StringifyBool     `json:"ignore_submodules_and_nested"`
 	IgnoredFilePath           typedpath.RawPath `json:"ignored_file_path"`
 
-	EnableAutofix StringifyBool `json:"enable_autofix"`
-	AutofixGlobs  []string      `json:"autofix_globs"`
+	EnableAutofix              StringifyBool `json:"enable_autofix"`
+	CommaSeparatedAutofixGlobs string        `json:"autofix_globs"`
 
 	EnableJUnit  StringifyBool     `json:"enable_junit"`
 	JUnitXMLPath typedpath.RawPath `json:"junit_xml_path"`

@@ -133,8 +133,9 @@ func NewValidateFunc(
 
 		var autofixOpts *autofix.Options
 		if i.EnableAutofix {
-			allowedGlobs := make([]globs.Glob, len(i.AutofixGlobs))
-			for i, s := range i.AutofixGlobs {
+			autofixGlobs := strings.Split(i.CommaSeparatedAutofixGlobs, ",")
+			allowedGlobs := make([]globs.Glob, len(autofixGlobs))
+			for i, s := range autofixGlobs {
 				allowedGlobs[i] = globs.Glob(s)
 			}
 			autofixOpts, err = buildAutofixOpts(rootDirAbs, allowedGlobs)
