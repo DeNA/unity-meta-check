@@ -39,7 +39,7 @@ func TestNewValidateFunc(t *testing.T) {
 		Env                inputs.ActionEnv
 		DetectedTargetType checker.TargetType
 		BuiltIgnoredGlobs  []globs.Glob
-		ReadPayload        *inputs.PushOrPullRequestEventPayload
+		ReadPayload        *inputs.EventPayload
 		ReadTmpl           *l10n.Template
 		Expected           *Options
 	}{
@@ -205,7 +205,7 @@ func TestNewValidateFunc(t *testing.T) {
 				EnableAutofix:   false,
 			},
 		},
-		"enable pr-comment with lang": {
+		"enable pr-comment with lang triggered by a pull_request event": {
 			Inputs: inputs.Inputs{
 				LogLevel:             "INFO",
 				TargetPath:           typedpath.NewRootRawPath("path", "to", "project"),
@@ -222,7 +222,7 @@ func TestNewValidateFunc(t *testing.T) {
 			},
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
-			ReadPayload: &inputs.PushOrPullRequestEventPayload{
+			ReadPayload: &inputs.EventPayload{
 				PullRequest: &inputs.PullRequest{Number: 2},
 				Repository: &inputs.Repository{
 					Name:  "Hello-World",
@@ -256,7 +256,7 @@ func TestNewValidateFunc(t *testing.T) {
 				},
 			},
 		},
-		"enable pr-comment with a template file": {
+		"enable pr-comment with a template file triggered by a pull_request event": {
 			Inputs: inputs.Inputs{
 				LogLevel:              "INFO",
 				TargetPath:            typedpath.NewRootRawPath("path", "to", "project"),
@@ -274,7 +274,7 @@ func TestNewValidateFunc(t *testing.T) {
 			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
 			BuiltIgnoredGlobs:  []globs.Glob{},
 			ReadTmpl:           tmpl,
-			ReadPayload: &inputs.PushOrPullRequestEventPayload{
+			ReadPayload: &inputs.EventPayload{
 				PullRequest: &inputs.PullRequest{Number: 2},
 				Repository: &inputs.Repository{
 					Name:  "Hello-World",
@@ -305,6 +305,59 @@ func TestNewValidateFunc(t *testing.T) {
 					Owner:         "Codertocat",
 					Repo:          "Hello-World",
 					PullNumber:    2,
+				},
+			},
+		},
+		"enable pr-comment with lang triggered by an issue_comment event": {
+			Inputs: inputs.Inputs{
+				LogLevel:        "INFO",
+				TargetPath:      typedpath.NewRootRawPath("path", "to", "project"),
+				TargetType:      "auto-detect",
+				EnablePRComment: true,
+				PRCommentLang:   "en",
+			},
+			Env: inputs.ActionEnv{
+				GitHubToken: "T0K3N",
+				EventPath:   typedpath.NewRootRawPath("github", "workflow", "event.json"),
+				Workspace:   typedpath.NewRootRawPath("github", "workspace"),
+				APIURL:      "https://api.github.com",
+			},
+			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
+			BuiltIgnoredGlobs:  []globs.Glob{},
+			ReadPayload: &inputs.EventPayload{
+				Issue: &inputs.Issue{
+					Number:      123,
+					PullRequest: &inputs.IssuePullRequest{URL: "https://api.github.com/Codertocat/Hello-World/pulls/123"},
+				},
+				Repository: &inputs.Repository{
+					Name:  "Hello-World",
+					Owner: inputs.User{Login: "Codertocat"},
+				},
+			},
+			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
+				CheckerOpts: &checker.Options{
+					IgnoreCase:                false,
+					IgnoreSubmodulesAndNested: false,
+					// NOTE: same as the value of DetectedTargetType.
+					TargetType: checker.TargetTypeIsUnityProjectRootDirectory,
+				},
+				FilterOpts: &resultfilter.Options{
+					IgnoreDangling: false,
+					// NOTE: same as the value of BuiltIgnoredGlobs.
+					IgnoredGlobs: []globs.Glob{},
+					IgnoreCase:   false,
+				},
+				EnableJUnit:     false,
+				EnablePRComment: true,
+				PRCommentOpts: &github.Options{
+					Tmpl:          &l10n.En,
+					SendIfSuccess: false,
+					Token:         "T0K3N",
+					APIEndpoint:   githubComAPIEndpoint,
+					Owner:         "Codertocat",
+					Repo:          "Hello-World",
+					PullNumber:    123,
 				},
 			},
 		},
