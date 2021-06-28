@@ -126,7 +126,7 @@ jobs:
           pr_comment_lang: ja
           pr_comment_send_success: true
         env:
-          GITHUB_TOKEN: "${{ secrets.YOUR_GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: See how autofix did
         run: git status
