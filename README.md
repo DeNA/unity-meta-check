@@ -118,6 +118,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: DeNA/unity-meta-check@3.0.0-alpha1
         with:
+          target_path: ./Packages/com.example.pkg.awesome
           enable_autofix: true
           autofix_globs: .
           enable_junit: true
