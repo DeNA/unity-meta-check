@@ -80,6 +80,11 @@ func BuildMetadata() GHActionsMetadata {
 				desc:         "File path to custom template file for GitHub Pull Request Comments (note: cannot specify both lang and pr_comment_tmpl_file)",
 				defaultValue: "",
 			},
+			IntInputDef{
+				name:         "pr_comment_pull_number",
+				desc:         "Pull request number to comment",
+				defaultValue: 0,
+			},
 			BoolInputDef{
 				name:         "pr_comment_send_success",
 				desc:         "Send a comment if no missing/dangling .meta found",

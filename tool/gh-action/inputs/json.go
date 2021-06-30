@@ -51,6 +51,7 @@ type Inputs struct {
 	PRCommentTmplFilePath typedpath.RawPath `json:"pr_comment_tmpl_file"`
 	PRCommentLang         string            `json:"pr_comment_lang"`
 	PRCommentSendSuccess  StringifyBool     `json:"pr_comment_send_success"`
+	PRCommentPullNumber   StringifyInt      `json:"pr_comment_pull_number"`
 }
 
 type StringifyBool bool

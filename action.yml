@@ -76,6 +76,11 @@ inputs:
     required: false
     default: ""
 
+  "pr_comment_pull_number":
+    description: "Pull request number to comment"
+    required: false
+    default: "0"
+
   "pr_comment_send_success":
     description: "Send a comment if no missing/dangling .meta found"
     required: false

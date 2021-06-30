@@ -205,7 +205,58 @@ func TestNewValidateFunc(t *testing.T) {
 				EnableAutofix:   false,
 			},
 		},
-		"enable pr-comment with lang": {
+		"enable pr-comment with lang with pull_number": {
+			Inputs: inputs.Inputs{
+				LogLevel:             "INFO",
+				TargetPath:           typedpath.NewRootRawPath("path", "to", "project"),
+				TargetType:           "auto-detect",
+				EnablePRComment:      true,
+				PRCommentLang:        "ja",
+				PRCommentSendSuccess: true,
+				PRCommentPullNumber:  123,
+			},
+			Env: inputs.ActionEnv{
+				GitHubToken: "T0K3N",
+				EventPath:   typedpath.NewRootRawPath("github", "workflow", "event.json"),
+				Workspace:   typedpath.NewRootRawPath("github", "workspace"),
+				APIURL:      "https://api.github.com",
+			},
+			DetectedTargetType: checker.TargetTypeIsUnityProjectRootDirectory,
+			BuiltIgnoredGlobs:  []globs.Glob{},
+			ReadPayload: &inputs.PushOrPullRequestEventPayload{
+				Repository: &inputs.Repository{
+					Name:  "Hello-World",
+					Owner: inputs.User{Login: "Codertocat"},
+				},
+			},
+			Expected: &Options{
+				RootDirAbs: typedpath.NewRootRawPath("path", "to", "project"),
+				CheckerOpts: &checker.Options{
+					IgnoreCase:                false,
+					IgnoreSubmodulesAndNested: false,
+					// NOTE: same as the value of DetectedTargetType.
+					TargetType: checker.TargetTypeIsUnityProjectRootDirectory,
+				},
+				FilterOpts: &resultfilter.Options{
+					IgnoreDangling: false,
+					// NOTE: same as the value of BuiltIgnoredGlobs.
+					IgnoredGlobs: []globs.Glob{},
+					IgnoreCase:   false,
+				},
+				EnableJUnit:     false,
+				EnablePRComment: true,
+				PRCommentOpts: &github.Options{
+					Tmpl:          &l10n.Ja,
+					SendIfSuccess: true,
+					Token:         "T0K3N",
+					APIEndpoint:   githubComAPIEndpoint,
+					Owner:         "Codertocat",
+					Repo:          "Hello-World",
+					PullNumber:    123,
+				},
+			},
+		},
+		"enable pr-comment with lang triggered by pull_request events": {
 			Inputs: inputs.Inputs{
 				LogLevel:             "INFO",
 				TargetPath:           typedpath.NewRootRawPath("path", "to", "project"),
@@ -256,7 +307,7 @@ func TestNewValidateFunc(t *testing.T) {
 				},
 			},
 		},
-		"enable pr-comment with a template file": {
+		"enable pr-comment with a template file triggered by pull_request events": {
 			Inputs: inputs.Inputs{
 				LogLevel:              "INFO",
 				TargetPath:            typedpath.NewRootRawPath("path", "to", "project"),
