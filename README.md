@@ -144,15 +144,17 @@ jobs:
 
 ```yaml
 name: Meta Check
-on: pull_request
+on: push
 
 jobs:
   meta-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - uses: jwalton/gh-find-current-pr@v1
         id: findPr
+
       - uses: DeNA/unity-meta-check@3.0.0-alpha1
           enable_pr_comment: true
           pr_comment_pull_number: ${{ steps.findPr.outputs.number }}
