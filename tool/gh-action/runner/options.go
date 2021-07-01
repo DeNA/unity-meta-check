@@ -94,8 +94,13 @@ func NewValidateFunc(
 				return nil, err
 			}
 
-			if eventPayload.PullRequest == nil {
-				return nil, fmt.Errorf("pull request comment can work only if triggered by pull request events, but triggered a not pull request event")
+			var pullNumber prcomment.PullNumber
+			if i.PRCommentPullNumber > 0 {
+				pullNumber = prcomment.PullNumber(i.PRCommentPullNumber)
+			} else if eventPayload.PullRequest != nil {
+				pullNumber = eventPayload.PullRequest.Number
+			} else {
+				return nil, fmt.Errorf("pull request comment can work only if triggered by pull request events or specified pr_comment_pull_number, but neither satisfied")
 			}
 
 			var tmpl *l10n.Template
@@ -126,7 +131,7 @@ func NewValidateFunc(
 				APIEndpoint:   apiEndpoint,
 				Owner:         eventPayload.Repository.Owner.Login,
 				Repo:          eventPayload.Repository.Name,
-				PullNumber:    eventPayload.PullRequest.Number,
+				PullNumber:    pullNumber,
 			}
 		}
 

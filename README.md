@@ -103,7 +103,7 @@ jobs:
 See [`./action.yml`](./action.yml) for more detials.
 
 <details>
-<summary>Advanced Usage</summary>
+<summary>Advanced Usage for JUnit report + Autofix + PR Comment report</summary>
 
 The following YAML is the example for JUnit report + Autofix + PR Comment report:
 
@@ -136,6 +136,30 @@ jobs:
         with:
           report_paths: junit.xml
         if: always()
+```
+</details>
+
+<details>
+<summary>Advanced Usage for <code>push</code> events instead of <code>pull_request</code> events</summary>
+
+```yaml
+name: Meta Check
+on: push
+
+jobs:
+  meta-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+
+      - uses: DeNA/unity-meta-check@3.0.0-alpha1
+          enable_pr_comment: true
+          pr_comment_pull_number: ${{ steps.findPr.outputs.number }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.YOUR_GITHUB_TOKEN }}"
 ```
 </details>
 

@@ -14,5 +14,6 @@
   "ignore_case": "false",
   "ignore_submodules_and_nested": "false",
   "pr_comment_tmpl_file": "",
+  "pr_comment_pull_number": "123",
   "pr_comment_event_path": "/home/runner/work/_temp/_github_workflow/event.json"
 }

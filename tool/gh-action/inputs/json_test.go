@@ -40,6 +40,7 @@ func TestExample(t *testing.T) {
 		PRCommentTmplFilePath:      "",
 		PRCommentLang:              "ja",
 		PRCommentSendSuccess:       true,
+		PRCommentPullNumber:        StringifyInt(123),
 	}
 
 	if !reflect.DeepEqual(expected, in) {
