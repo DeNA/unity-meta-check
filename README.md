@@ -140,7 +140,7 @@ jobs:
 </details>
 
 <details>
-<summary>Advanced Usage for <code>push</code> events instead of <code>pull\_request</code> events</summary>
+<summary>Advanced Usage for <code>push</code> events instead of <code>pull_request</code> events</summary>
 
 ```yaml
 name: Meta Check
