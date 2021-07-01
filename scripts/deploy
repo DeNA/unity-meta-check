@@ -55,10 +55,12 @@ main() {
 	gh auth status
 	go test ./...
 
-	if (git tag | grep -Fqx "$version"); then
-		throw "a tag has the same name exists on local, so if still you want to overwrite the tag, please remove the tag on local and try again.: '$version'"
+	local tag="v${version}"
+
+	if (git tag | grep -Fqx "$tag"); then
+		throw "a tag has the same name exists on local, so if still you want to overwrite the tag, please remove the tag on local and try again.: '$tag'"
 	fi
-	git tag "$version"
+	git tag "$tag"
 
 	(cd "$BASE_DIR"
 		./scripts/deploy-gh-release

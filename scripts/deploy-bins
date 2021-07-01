@@ -39,9 +39,11 @@ main() {
 	local version
 	version="$("$BASE_DIR/scripts/print-version")"
 
+	local tag="v${version}"
+
 	(cd "$BASE_DIR"
-		(git tag | grep -Fqx "$version") || throw "tag does not exist: '$version'"
-		git push origin "$version" || throw "a tag has the same name exists on the remote, so if still you want to overwrite the tag, please remove the tag on the remote and try again."
+		(git tag | grep -Fqx "$tag") || throw "tag does not exist: '$tag'"
+		git push origin "$tag" || throw "a tag has the same name exists on the remote, so if still you want to overwrite the tag, please remove the tag on the remote and try again."
 
 		echo-stderr "DEPLOY TO UNITY-META-CHECK-BINS"
 
@@ -55,12 +57,12 @@ main() {
 			cd ./unity-meta-check-bins
 		fi
 
-		./unity-meta-check-build-toolchains "$version"
+		./unity-meta-check-build-toolchains "$tag"
 		git add .
-		git commit --allow-empty -m "Update executables to $version"
+		git commit --allow-empty -m "Update executables to $tag"
 
-		git tag "$version"
-		git push origin "$version"
+		git tag "$tag"
+		git push origin "$tag"
 	)
 }
 

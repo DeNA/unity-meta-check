@@ -46,23 +46,25 @@ main() {
 		local title
 		title="$(git log -1 --format=%s HEAD)"
 
-		(git tag | grep -Fqx "$version") || throw "tag does not exist: '$version'"
-		git push origin "$version" || throw "a tag has the same name exists, so if still you want to overwrite the tag, please remove the tag on the remote and try again."
+		local tag="v${version}"
+
+		(git tag | grep -Fqx "$tag") || throw "tag does not exist: '$tag'"
+		git push origin "$tag" || throw "a tag has the same name exists, so if still you want to overwrite the tag, please remove the tag on the remote and try again."
 
 		echo-stderr "ENVIRONMENT"
 		echo-stderr "revision to deploy:\n$(git rev-parse HEAD)\n"
 		echo-stderr "go version:\n$(go version)\n"
 
-		git checkout "$version" || throw "make git status clean and try again."
+		git checkout "$tag" || throw "make git status clean and try again."
 
 		echo-stderr "DEPLOY TO GITHUB RELEASES"
 		echo-stderr "creating a github release if it does not exist..."
 
-		if ! gh release view "$version"; then
+		if ! gh release view "$tag"; then
 			if echo "$version" | "$BASE_DIR/scripts/is-prerelease"; then
-				gh release create --prerelease --title "$title" "$version"
+				gh release create --prerelease --title "$title" "$tag"
 			else
-				gh release create --title "$title" "$version"
+				gh release create --title "$title" "$tag"
 			fi
 		fi
 		echo-stderr
@@ -75,10 +77,10 @@ main() {
 
 		echo-stderr "uploading executables..."
 		(cd "./out"
-			find . -type f | sed 's/\.\///' | xargs gh release upload "$version"
+			find . -type f | sed 's/\.\///' | xargs gh release upload "$tag"
 		)
 
-		gh release view -w "$version"
+		gh release view -w "$tag"
 	)
 }
 
