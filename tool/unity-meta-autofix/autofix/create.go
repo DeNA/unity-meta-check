@@ -24,6 +24,8 @@ func NewMetaCreator(dryRun bool, guidGen meta.GUIDGen, logger logging.Logger) Me
 			metaGen = meta.DefaultImporterFolderGen{GUID: guid}
 		case MetaTypeTextScriptImporter:
 			metaGen = meta.TextScriptImporterGen{GUID: guid}
+		case MetaTypeMonoImporter:
+			metaGen = meta.MonoImporterGen{GUID: guid}
 		default:
 			return fmt.Errorf("unsupported meta type: %q", metaType)
 		}
