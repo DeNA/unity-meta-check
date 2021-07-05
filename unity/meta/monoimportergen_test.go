@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestTextScriptImporterGen_WriteTo(t *testing.T) {
+func TestMonoImporterGen_WriteTo(t *testing.T) {
 	gen := meta.MonoImporterGen{GUID: meta.ZeroGUID()}
 
 	buf := &bytes.Buffer{}
@@ -20,7 +20,7 @@ func TestTextScriptImporterGen_WriteTo(t *testing.T) {
 	actual := buf.String()
 	expected := `fileFormatVersion: 2
 guid: 00000000000000000000000000000000
-TextScriptImporter:
+MonoImporter:
   externalObjects: {}
   userData: 
   assetBundleName: 

@@ -16,7 +16,7 @@ func (t MonoImporterGen) WriteTo(writer io.Writer) (int64, error) {
 	content := strings.TrimLeft(fmt.Sprintf(`
 fileFormatVersion: 2
 guid: %s
-TextScriptImporter:
+MonoImporter:
   externalObjects: {}
   userData: 
   assetBundleName: 
