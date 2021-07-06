@@ -13,6 +13,7 @@ type MetaType string
 const (
 	MetaTypeDefaultImporterFolder MetaType = "MetaTypeDefaultImporterFolder"
 	MetaTypeTextScriptImporter    MetaType = "MetaTypeTextScriptImporter"
+	MetaTypeMonoImporter          MetaType = "MetaTypeMonoImporter"
 )
 
 type MetaTypeDetector func(missingMeta typedpath.RawPath) (MetaType, error)
@@ -36,6 +37,8 @@ func NewMetaTypeDetector(isDir ostestable.IsDir) MetaTypeDetector {
 		switch strings.ToLower(ext) {
 		case ".json", ".bytes", ".csv", ".pb", ".txt", ".xml", ".proto":
 			return MetaTypeTextScriptImporter, nil
+		case ".cs":
+			return MetaTypeMonoImporter, nil	
 		default:
 			return "", fmt.Errorf("should not create .meta because the extension is not supported now: %s", originalPath)
 		}
