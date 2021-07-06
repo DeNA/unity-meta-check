@@ -35,12 +35,17 @@ func NewMetaTypeDetector(isDir ostestable.IsDir) MetaTypeDetector {
 		}
 
 		switch strings.ToLower(ext) {
-		case ".json", ".bytes", ".csv", ".pb", ".txt", ".xml", ".proto":
+		case ".json", ".bytes", ".csv", ".pb", ".txt", ".xml", ".proto", ".md":
 			return MetaTypeTextScriptImporter, nil
 		case ".cs":
-			return MetaTypeMonoImporter, nil	
+			return MetaTypeMonoImporter, nil
 		default:
-			return "", fmt.Errorf("should not create .meta because the extension is not supported now: %s", originalPath)
+			switch originalPath.Base() {
+			case "LICENSE":
+				return MetaTypeTextScriptImporter, nil
+			default:
+				return "", fmt.Errorf("should not create .meta because the extension is not supported now: %s", originalPath)
+			}
 		}
 	}
 }

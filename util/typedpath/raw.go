@@ -65,6 +65,10 @@ func (r RawPath) Ext() string {
 	return filepath.Ext(string(r))
 }
 
+func (r RawPath) Base() string {
+	return filepath.Base(string(r))
+}
+
 func (r RawPath) TrimLastSep() RawPath {
 	return RawPath(strings.TrimRight(string(r), string(filepath.Separator)))
 }

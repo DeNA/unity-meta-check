@@ -28,6 +28,16 @@ func TestNewMetaTypeDetectorValid(t *testing.T) {
 			IsDir:       false,
 			Expected: MetaTypeTextScriptImporter,
 		},
+		{
+			MissingMeta: typedpath.NewRawPath("Assets", "README.md.meta"),
+			IsDir:       false,
+			Expected: MetaTypeTextScriptImporter,
+		},
+		{
+			MissingMeta: typedpath.NewRawPath("Assets", "LICENSE.meta"),
+			IsDir:       false,
+			Expected: MetaTypeTextScriptImporter,
+		},
 	}
 
 	for _, c := range cases {
