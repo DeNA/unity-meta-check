@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: DeNA/unity-meta-check@3.0.0-alpha1
+      - uses: DeNA/unity-meta-check@v3
 ```
 
 See [`./action.yml`](./action.yml) for more detials.
@@ -116,7 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: DeNA/unity-meta-check@3.0.0-alpha1
+      - uses: DeNA/unity-meta-check@v3
         with:
           enable_autofix: true
           autofix_globs: .
@@ -155,7 +155,7 @@ jobs:
       - uses: jwalton/gh-find-current-pr@v1
         id: findPr
 
-      - uses: DeNA/unity-meta-check@3.0.0-alpha1
+      - uses: DeNA/unity-meta-check@v3
           enable_pr_comment: true
           pr_comment_pull_number: ${{ steps.findPr.outputs.number }}
         env:
