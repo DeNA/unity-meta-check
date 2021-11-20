@@ -1,0 +1,22 @@
+name: Update major version and latest tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nowsprinting/check-version-format-action@v1
+        id: version
+        with:
+          prefix: v
+      - name: Update major version and latest tag
+        run: |
+          git tag "${{ steps.version.outputs.major }}"
+          git tag latest
+          git push --tags --force
+        if: steps.version.outputs.is_valid == 'true'
