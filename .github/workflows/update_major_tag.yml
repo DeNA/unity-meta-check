@@ -16,7 +16,6 @@ jobs:
           prefix: v
       - name: Update major version and latest tag
         run: |
-          git branch --force "${{ steps.version.outputs.major }}" "${{ github.ref }}"
-          git branch --force latest "${{ github.ref }}"
-          git push --force
+          git push --force origin "${{ github.ref }}:${{ steps.version.outputs.major }}" 
+          git push --force origin "${{ github.ref }}:latest" 
         if: steps.version.outputs.is_valid == 'true'
