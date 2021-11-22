@@ -16,6 +16,6 @@ jobs:
           prefix: v
       - name: Update major version and latest tag
         run: |
-          git push --force 'https://${{ github.actor }}:${{ github.token }}@github.com/DeNA/unity-meta-check' 'HEAD:${{ github.ref }}:${{ steps.version.outputs.major }}' 
+          git push --force 'https://${{ github.actor }}:${{ github.token }}@github.com/DeNA/unity-meta-check' 'HEAD:${{ steps.version.outputs.major }}' 
           git push --force 'https://${{ github.actor }}:${{ github.token }}@github.com/DeNA/unity-meta-check' 'HEAD:latest' 
         if: steps.version.outputs.is_valid == 'true'
