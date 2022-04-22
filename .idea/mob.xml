@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MobProjectSettings">
+    <option name="remoteName" value="origin" />
+    <option name="baseBranch" value="master" />
+    <option name="wipBranch" value="mob-session" />
+    <option name="timerMinutes" value="10" />
+    <option name="wipCommitMessage" value="mob next [ci-skip]" />
+    <option name="nextStay" value="true" />
+  </component>
+</project>

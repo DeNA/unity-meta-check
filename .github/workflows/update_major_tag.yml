@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: nowsprinting/check-version-format-action@v1
+      - uses: nowsprinting/check-version-format-action@v3
         id: version
         with:
           prefix: v
       - name: Update major version and latest tag
         run: |
-          git push --force origin 'HEAD:${{ steps.version.outputs.major }}' 
-          git push --force origin 'HEAD:latest' 
+          git push --force origin 'HEAD:refs/heads/${{ steps.version.outputs.major_prerelease }}'
+          git push --force origin 'HEAD:refs/heads/latest'
         if: steps.version.outputs.is_valid == 'true'
