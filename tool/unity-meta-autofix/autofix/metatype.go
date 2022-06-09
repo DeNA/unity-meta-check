@@ -2,10 +2,11 @@ package autofix
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/DeNA/unity-meta-check/unity"
 	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
-	"strings"
 )
 
 type MetaType string
@@ -35,7 +36,7 @@ func NewMetaTypeDetector(isDir ostestable.IsDir) MetaTypeDetector {
 		}
 
 		switch strings.ToLower(ext) {
-		case ".json", ".bytes", ".csv", ".pb", ".txt", ".xml", ".proto", ".md":
+		case ".json", ".bytes", ".csv", ".pb", ".txt", ".xml", ".proto", ".md", ".asmdef":
 			return MetaTypeTextScriptImporter, nil
 		case ".cs":
 			return MetaTypeMonoImporter, nil
