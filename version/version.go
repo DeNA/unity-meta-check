@@ -1,4 +1,4 @@
 package version
 
 // NOTE: Also edit the image tag in action.yml
-const Version = "3.0.0-beta4"
+const Version = "3.1.1-alpha0"
