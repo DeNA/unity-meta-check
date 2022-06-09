@@ -61,6 +61,7 @@ main() {
 		git add .
 		git commit --allow-empty -m "Update executables to $tag"
 
+		git push origin master
 		git tag "$tag"
 		git push origin "$tag"
 	)
