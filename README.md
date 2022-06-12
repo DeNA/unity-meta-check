@@ -172,7 +172,7 @@ This way is useful to ensure to use the same unity-meta-check version on CI or m
 
 ```console
 $ cd /path/to/your/repo
-$ git add submodule git@github.com:dena/unity-meta-check-bins ./path/to/unity-meta-check-bins
+$ git submodule add git@github.com:dena/unity-meta-check-bins ./path/to/unity-meta-check-bins
 
 $ ./path/to/unity-meta-check-bins/unity-meta-check-easy -help
 ```
