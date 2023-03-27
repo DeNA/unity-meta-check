@@ -15,6 +15,7 @@ const (
 	MetaTypeDefaultImporterFolder MetaType = "MetaTypeDefaultImporterFolder"
 	MetaTypeTextScriptImporter    MetaType = "MetaTypeTextScriptImporter"
 	MetaTypeMonoImporter          MetaType = "MetaTypeMonoImporter"
+	MetaTypeDefaultImporter       MetaType = "MetaTypeDefaultImporter"
 )
 
 type MetaTypeDetector func(missingMeta typedpath.RawPath) (MetaType, error)
@@ -40,6 +41,8 @@ func NewMetaTypeDetector(isDir ostestable.IsDir) MetaTypeDetector {
 			return MetaTypeTextScriptImporter, nil
 		case ".cs":
 			return MetaTypeMonoImporter, nil
+		case ".yaml", ".yml":
+			return MetaTypeDefaultImporter, nil
 		default:
 			switch originalPath.Base() {
 			case "LICENSE":
