@@ -19,6 +19,7 @@ import (
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/ostestable"
+	"github.com/DeNA/unity-meta-check/util/testutil"
 	"github.com/DeNA/unity-meta-check/version"
 )
 
@@ -40,6 +41,20 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 	if opts.Version {
 		_, _ = fmt.Fprintln(procInout.Stdout, version.Version)
 		return cli.ExitNormal
+	}
+
+	// XXX: Avoid errors like "detected dubious ownership in repository at '...'".
+	// 	    The file owner of files in opts.Env.Workspace is user outside the container, but git is run by root in the container.
+	// 	    Therefore, a wrong owner seem from git in a container. So git throw the error.
+	// 	    This code trust all repositories in both the container and mounted volumes. It justified by the 2 assumptions:
+	//
+	//        1) No evil repositories in the container. It is unity-meta-check's responsibility.
+	//        2) No evil repositories in mounted volumes. It is user's responsibility.
+	//
+	gitGlobalConfig := git.NewGlobalConfig(logger)
+	if err := gitGlobalConfig(testutil.SpyWriteCloser(nil), "--add", "safe.directory", "*"); err != nil {
+		logger.Error("failed to add '*' to safe.directory")
+		return cli.ExitAbnormal
 	}
 
 	validate := runner.NewValidateFunc(
