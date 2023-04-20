@@ -61,7 +61,7 @@ func TestNewAutoFixer(t *testing.T) {
 				[]typedpath.SlashPath{"Assets/Dangling.meta"},
 			),
 			AllowedGlobs: []globs.Glob{
-				globs.Glob(filepath.Join("Assets", "*")),
+				globs.Glob("Assets/*"),
 			},
 			ExpectedErr: false,
 			ExpectedSkipped: &checker.CheckResult{
@@ -77,7 +77,7 @@ func TestNewAutoFixer(t *testing.T) {
 				[]typedpath.SlashPath{"Assets/Dangling.meta"},
 			),
 			AllowedGlobs: []globs.Glob{
-				globs.Glob(filepath.Join("Assets", "*")),
+				globs.Glob("Assets/*"),
 			},
 			ExpectedErr: false,
 			ExpectedSkipped: &checker.CheckResult{
