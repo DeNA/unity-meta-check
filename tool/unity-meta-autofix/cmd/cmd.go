@@ -35,6 +35,13 @@ func NewMain() cli.Command {
 
 		logger := logging.NewLogger(opts.LogLevel, procInout.Stderr)
 
+		buildOpts := autofix.NewOptionsBuilder(ostestable.NewGetwd())
+		autofixOpts, err := buildOpts(opts.RootDirAbs, opts.AllowedGlobs)
+		if err != nil {
+			logger.Error(err.Error())
+			return cli.ExitNormal
+		}
+
 		autofixFunc := autofix.NewAutoFixer(
 			opts.DryRun,
 			ostestable.NewGetwd(),
@@ -44,14 +51,13 @@ func NewMain() cli.Command {
 			logger,
 		)
 
-		buildOpts := autofix.NewOptionsBuilder(ostestable.NewGetwd())
-		autofixOpts, err := buildOpts(opts.RootDirAbs, opts.AllowedGlobs)
+		skipped, err := autofixFunc(result, autofixOpts)
 		if err != nil {
 			logger.Error(err.Error())
-			return cli.ExitNormal
+			return cli.ExitAbnormal
 		}
 
-		if err := autofixFunc(result, autofixOpts); err != nil {
+		if err := report.WriteResult(procInout.Stdout, skipped); err != nil {
 			logger.Error(err.Error())
 			return cli.ExitAbnormal
 		}
