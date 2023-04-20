@@ -39,6 +39,17 @@ func NewRunner(
 			return false, err
 		}
 
+		if opts.EnableAutofix {
+			logger.Debug(fmt.Sprintf("autofix: %#v", opts.AutofixOpts))
+			skipped, err := doAutofix(resultFiltered, opts.AutofixOpts)
+			if err != nil {
+				return false, err
+			}
+			resultFiltered = skipped
+		} else {
+			logger.Debug(`skip autofix because "enable_autofix" is false`)
+		}
+
 		logger.Debug("print check result")
 		if err := report.WriteResult(w, resultFiltered); err != nil {
 			return false, err
@@ -60,15 +71,6 @@ func NewRunner(
 			}
 		} else {
 			logger.Debug(`skip send a pull request comment because "enable_pr_comment" is false`)
-		}
-
-		if opts.EnableAutofix {
-			logger.Debug(fmt.Sprintf("autofix: %#v", opts.AutofixOpts))
-			if err := doAutofix(resultFiltered, opts.AutofixOpts); err != nil {
-				return false, err
-			}
-		} else {
-			logger.Debug(`skip autofix because "enable_autofix" is false`)
 		}
 
 		return resultFiltered.Empty(), nil

@@ -1,25 +1,27 @@
 package autofix
 
 import (
-	"fmt"
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/globs"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/ostestable"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
+	"github.com/google/go-cmp/cmp"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
 func TestNewAutoFixer(t *testing.T) {
-	cases := []struct {
-		DryRun       bool
-		RootDirRel   typedpath.RawPath
-		Target       *checker.CheckResult
-		AllowedGlobs []globs.Glob
-		ExpectedErr  bool
+	cases := map[string]struct {
+		DryRun          bool
+		RootDirRel      typedpath.RawPath
+		Target          *checker.CheckResult
+		AllowedGlobs    []globs.Glob
+		ExpectedErr     bool
+		ExpectedSkipped *checker.CheckResult
 	}{
-		{
+		"dry-run & no missing or dangling metas": {
 			DryRun:     true,
 			RootDirRel: typedpath.NewRawPath("testdata", "ValidProject"),
 			Target: checker.NewCheckResult(
@@ -30,8 +32,12 @@ func TestNewAutoFixer(t *testing.T) {
 				globs.Glob(filepath.Join("Assets", "*")),
 			},
 			ExpectedErr: false,
+			ExpectedSkipped: &checker.CheckResult{
+				MissingMeta:  []typedpath.SlashPath{},
+				DanglingMeta: []typedpath.SlashPath{},
+			},
 		},
-		{
+		"not dry-run & no missing or dangling metas": {
 			DryRun:     false,
 			RootDirRel: typedpath.NewRawPath("testdata", "ValidProject"),
 			Target: checker.NewCheckResult(
@@ -42,8 +48,12 @@ func TestNewAutoFixer(t *testing.T) {
 				globs.Glob(filepath.Join("Assets", "*")),
 			},
 			ExpectedErr: false,
+			ExpectedSkipped: &checker.CheckResult{
+				MissingMeta:  []typedpath.SlashPath{},
+				DanglingMeta: []typedpath.SlashPath{},
+			},
 		},
-		{
+		"dry-run & several missing or dangling metas": {
 			DryRun:     true,
 			RootDirRel: typedpath.NewRawPath("testdata", "InvalidProject"),
 			Target: checker.NewCheckResult(
@@ -54,8 +64,12 @@ func TestNewAutoFixer(t *testing.T) {
 				globs.Glob(filepath.Join("Assets", "*")),
 			},
 			ExpectedErr: false,
+			ExpectedSkipped: &checker.CheckResult{
+				MissingMeta:  []typedpath.SlashPath{},
+				DanglingMeta: []typedpath.SlashPath{},
+			},
 		},
-		{
+		"not dry-run & several missing or dangling metas": {
 			DryRun:     false,
 			RootDirRel: typedpath.NewRawPath("testdata", "InvalidProject"),
 			Target: checker.NewCheckResult(
@@ -66,11 +80,29 @@ func TestNewAutoFixer(t *testing.T) {
 				globs.Glob(filepath.Join("Assets", "*")),
 			},
 			ExpectedErr: false,
+			ExpectedSkipped: &checker.CheckResult{
+				MissingMeta:  []typedpath.SlashPath{},
+				DanglingMeta: []typedpath.SlashPath{},
+			},
+		},
+		"several skipped": {
+			DryRun:     false,
+			RootDirRel: typedpath.NewRawPath("testdata", "InvalidProject"),
+			Target: checker.NewCheckResult(
+				[]typedpath.SlashPath{"Assets/Missing.meta"},
+				[]typedpath.SlashPath{"Assets/Dangling.meta"},
+			),
+			AllowedGlobs: []globs.Glob{},
+			ExpectedErr:  false,
+			ExpectedSkipped: &checker.CheckResult{
+				MissingMeta:  []typedpath.SlashPath{"Assets/Missing.meta"},
+				DanglingMeta: []typedpath.SlashPath{"Assets/Dangling.meta"},
+			},
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(fmt.Sprintf("%q, %v, %v", c.RootDirRel, c.Target, c.AllowedGlobs), func(t *testing.T) {
+	for desc, c := range cases {
+		t.Run(desc, func(t *testing.T) {
 			metaTypeDetector := StubMetaTypeDetector(MetaTypeTextScriptImporter, nil)
 			metaCreator := StubMetaCreator(nil)
 			metaRemover := StubMetaRemover(nil)
@@ -78,7 +110,7 @@ func TestNewAutoFixer(t *testing.T) {
 
 			autofix := NewAutoFixer(c.DryRun, ostestable.NewGetwd(), metaTypeDetector, metaCreator, metaRemover, spyLogger)
 
-			err := autofix(c.Target, &Options{
+			skipped, err := autofix(c.Target, &Options{
 				RootDirAbs:   rootDirAbs(c.RootDirRel),
 				RootDirRel:   c.RootDirRel,
 				AllowedGlobs: c.AllowedGlobs,
@@ -94,7 +126,10 @@ func TestNewAutoFixer(t *testing.T) {
 				if err != nil {
 					t.Log(spyLogger.Logs.String())
 					t.Errorf("want nil, got %#v", err)
-					return
+				}
+
+				if !reflect.DeepEqual(skipped, c.ExpectedSkipped) {
+					t.Error(cmp.Diff(c.ExpectedSkipped, skipped))
 				}
 			}
 		})

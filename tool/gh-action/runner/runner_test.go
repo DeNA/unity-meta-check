@@ -50,7 +50,7 @@ func TestNewRunner(t *testing.T) {
 							if enableJUnit {
 								junitOutPath = typedpath.NewRawPath("out", "junit.xml")
 							}
-							
+
 							var prCommentOpts *github.Options
 							if enablePRComment {
 								prCommentOpts = &github.Options{
@@ -123,7 +123,7 @@ func TestNewRunner(t *testing.T) {
 				resultfilter.NewFilter(ostestable.NewGetwd(), spyLogger),
 				junit.SpyWriteToFileFunc(junit.StubWriteToFileFunc(nil), &junitWriteToFileCallArgs),
 				github.SpySendFunc(github.StubSendFunc(nil), &sendFuncCallArgs),
-				autofix.SpyAutoFixer(autofix.StubAutoFixer(nil), &autoFixerCallArgs),
+				autofix.SpyAutoFixer(autofix.StubAutoFixer(&checker.CheckResult{}, nil), &autoFixerCallArgs),
 				buf,
 				spyLogger,
 			)
