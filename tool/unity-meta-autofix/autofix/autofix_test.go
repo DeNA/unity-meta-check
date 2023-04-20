@@ -129,6 +129,7 @@ func TestNewAutoFixer(t *testing.T) {
 				}
 
 				if !reflect.DeepEqual(skipped, c.ExpectedSkipped) {
+					t.Log(spyLogger.Logs.String())
 					t.Error(cmp.Diff(c.ExpectedSkipped, skipped))
 				}
 			}
