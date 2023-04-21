@@ -13,16 +13,18 @@ const (
 	RepositoryTypeIsNested    RepositoryType = false
 )
 
-type RepoFinder func(writer chan<- *FoundRepo) error
+type RepoFinder func() ([]FoundRepo, error)
 
 func New(rootDirAbs typedpath.RawPath, targetDirRel typedpath.RawPath) RepoFinder {
-	return func(writer chan<- *FoundRepo) error {
+	return func() ([]FoundRepo, error) {
 		var targetDirAbs typedpath.RawPath
 		if targetDirRel == "." {
 			targetDirAbs = rootDirAbs
 		} else {
 			targetDirAbs = rootDirAbs.JoinRawPath(targetDirRel)
 		}
+
+		result := make([]FoundRepo, 0)
 
 		if err := filepath.Walk(string(targetDirAbs), func(path string, info os.FileInfo, err error) error {
 			if info == nil {
@@ -41,10 +43,10 @@ func New(rootDirAbs typedpath.RawPath, targetDirRel typedpath.RawPath) RepoFinde
 
 				// NOTE: Ignore the repository at the rootDirAbs.
 				if relPath != ".git" {
-					writer <- &FoundRepo{
-						RepositoryType(!isDir),
-						relPath.Dir(),
-					}
+					result = append(result, FoundRepo{
+						Type:    RepositoryType(!isDir),
+						RawPath: relPath.Dir(),
+					})
 				}
 				// NOTE: Skip finding into .git if it is a directory (this is a nested repository). But if it is a file
 				//       (this is a submodule) skipping will skip unexpectedly the parent directory instead of the file.
@@ -55,8 +57,8 @@ func New(rootDirAbs typedpath.RawPath, targetDirRel typedpath.RawPath) RepoFinde
 			}
 			return nil
 		}); err != nil {
-			return err
+			return result, err
 		}
-		return nil
+		return result, nil
 	}
 }

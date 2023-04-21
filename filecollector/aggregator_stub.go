@@ -4,8 +4,8 @@ import (
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 )
 
-func StubFileAggregator(result []typedpath.SlashPath, err error) FileAggregator {
-	return func(rootDirAbs typedpath.RawPath, opts *Options, ch chan<- typedpath.SlashPath) error {
+func StubFileAggregator(result []Entry, err error) FileAggregator {
+	return func(rootDirAbs typedpath.RawPath, opts *Options, ch chan<- Entry) error {
 		for _, path := range result {
 			ch <- path
 		}
@@ -13,6 +13,6 @@ func StubFileAggregator(result []typedpath.SlashPath, err error) FileAggregator 
 	}
 }
 
-func StubSuccessfulFileAggregator(result []typedpath.SlashPath) FileAggregator {
+func StubSuccessfulFileAggregator(result []Entry) FileAggregator {
 	return StubFileAggregator(result, nil)
 }

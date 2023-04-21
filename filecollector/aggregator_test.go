@@ -3,8 +3,8 @@ package filecollector
 import (
 	"github.com/DeNA/unity-meta-check/filecollector/repofinder"
 	"github.com/DeNA/unity-meta-check/git"
+	"github.com/DeNA/unity-meta-check/util/chanutil"
 	"github.com/DeNA/unity-meta-check/util/logging"
-	"github.com/DeNA/unity-meta-check/util/pathchan"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/google/go-cmp/cmp"
 	"reflect"
@@ -28,7 +28,7 @@ func TestNewFileAggregator(t *testing.T) {
 			panic(repoDir)
 		}
 	})
-	findNested := repofinder.Const([]*repofinder.FoundRepo{
+	findNested := repofinder.StubRepoFinder([]repofinder.FoundRepo{
 		{Type: repofinder.RepositoryTypeIsSubmodule, RawPath: "nested1"},
 		{Type: repofinder.RepositoryTypeIsNested, RawPath: "nested2"},
 		{Type: repofinder.RepositoryTypeIsNested, RawPath: typedpath.NewRawPath("nested1", "nestedInNested")},
@@ -36,15 +36,15 @@ func TestNewFileAggregator(t *testing.T) {
 	spyLogger := logging.SpyLogger()
 	collectRecursive := NewFileAggregator(gitLsFiles, findNested, spyLogger)
 
-	var actual []typedpath.SlashPath
-	spyCh := make(chan typedpath.SlashPath)
+	var actual []Entry
+	spyCh := make(chan Entry)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		actual = pathchan.ToSlice(spyCh)
+		actual = chanutil.ToSlice(spyCh)
 		sort.Slice(actual, func(i, j int) bool {
-			return actual[i] < actual[j]
+			return actual[i].Path < actual[j].Path
 		})
 	}()
 
@@ -58,16 +58,16 @@ func TestNewFileAggregator(t *testing.T) {
 
 	wg.Wait()
 
-	expected := []typedpath.SlashPath{
-		"dir",
-		"dir/file2",
-		"file1",
-		"nested1",
-		"nested1/nested1-file",
-		"nested1/nestedInNested",
-		"nested1/nestedInNested/nestedInNested-file",
-		"nested2",
-		"nested2/nested2-file",
+	expected := []Entry{
+		{Path: "dir", IsDir: true},
+		{Path: "dir/file2", IsDir: false},
+		{Path: "file1", IsDir: false},
+		{Path: "nested1", IsDir: true},
+		{Path: "nested1/nested1-file", IsDir: false},
+		{Path: "nested1/nestedInNested", IsDir: true},
+		{Path: "nested1/nestedInNested/nestedInNested-file", IsDir: false},
+		{Path: "nested2", IsDir: true},
+		{Path: "nested2/nested2-file", IsDir: false},
 	}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Log(spyLogger.Logs.String())
@@ -82,19 +82,19 @@ func TestNewFileAggregatorEmpty(t *testing.T) {
 		"path/to/file2",
 		"path/to/file3",
 	}, nil)
-	findNested := repofinder.Empty
+	findNested := repofinder.StubRepoFinder(nil, nil)
 	spyLogger := logging.SpyLogger()
 	collectRecursive := NewFileAggregator(gitLsFiles, findNested, spyLogger)
 
-	var actual []typedpath.SlashPath
-	spyCh := make(chan typedpath.SlashPath)
+	var actual []Entry
+	spyCh := make(chan Entry)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		actual = pathchan.ToSlice(spyCh)
+		actual = chanutil.ToSlice(spyCh)
 		sort.Slice(actual, func(i, j int) bool {
-			return actual[i] < actual[j]
+			return actual[i].Path < actual[j].Path
 		})
 	}()
 
@@ -108,12 +108,12 @@ func TestNewFileAggregatorEmpty(t *testing.T) {
 
 	wg.Wait()
 
-	expected := []typedpath.SlashPath{
-		"path",
-		"path/to",
-		"path/to/file1",
-		"path/to/file2",
-		"path/to/file3",
+	expected := []Entry{
+		{Path: "path", IsDir: true},
+		{Path: "path/to", IsDir: true},
+		{Path: "path/to/file1", IsDir: false},
+		{Path: "path/to/file2", IsDir: false},
+		{Path: "path/to/file3", IsDir: false},
 	}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Log(spyLogger.Logs.String())

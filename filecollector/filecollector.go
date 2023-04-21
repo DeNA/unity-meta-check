@@ -11,10 +11,10 @@ import (
 	"sync"
 )
 
-type FileCollector func(projRootAbs typedpath.RawPath, targetRel typedpath.RawPath, opts *Options, writer chan<- typedpath.SlashPath) error
+type FileCollector func(projRootAbs typedpath.RawPath, targetRel typedpath.RawPath, opts *Options, writer chan<- Entry) error
 
 func New(gitLsFiles git.LsFiles, logger logging.Logger) FileCollector {
-	return func(projRootAbs typedpath.RawPath, targetRel typedpath.RawPath, opts *Options, writer chan<- typedpath.SlashPath) error {
+	return func(projRootAbs typedpath.RawPath, targetRel typedpath.RawPath, opts *Options, writer chan<- Entry) error {
 		targetAbs := projRootAbs.JoinRawPath(targetRel)
 		targetRelSlash := targetRel.ToSlash()
 
@@ -40,17 +40,23 @@ func New(gitLsFiles git.LsFiles, logger logging.Logger) FileCollector {
 				} else {
 					filePath = targetRelSlash.JoinSlashPath(typedpath.SlashPath(scanner.Text()))
 				}
-				writer <- filePath
+				writer <- Entry{
+					Path: filePath,
+					// NOTE: git ls-files list only files.
+					IsDir: false,
+				}
 
-				// NOTE: It should be path.Dir instead of filepath.Dir because it will be used as file collections
-				//       (file collections are slash separated path for all OSes).
 				dirname := filePath.Dir()
 				for {
+					// NOTE: Do not list duplicated entries.
 					if dirSet.Has(dirname) {
 						break
 					}
 
-					writer <- dirname
+					writer <- Entry{
+						Path:  dirname,
+						IsDir: true,
+					}
 					dirSet.Add(dirname)
 					dirname = dirname.Dir()
 				}

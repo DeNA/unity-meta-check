@@ -2,9 +2,8 @@ package filecollector
 
 import (
 	"github.com/DeNA/unity-meta-check/git"
+	"github.com/DeNA/unity-meta-check/util/chanutil"
 	"github.com/DeNA/unity-meta-check/util/logging"
-	"github.com/DeNA/unity-meta-check/util/pathchan"
-	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/google/go-cmp/cmp"
 	"reflect"
 	"sort"
@@ -18,20 +17,19 @@ func TestNewOnlyTracked(t *testing.T) {
 	// NOTE: git returns a slash separated path on Windows.
 	gitLsFiles := git.StubRawLsFiles(`dir1/fileB
 fileA
-dir2
 `, nil)
 	opts := &Options{IgnoreCase: false}
 	onlyTracked := New(gitLsFiles, spyLogger)
 
-	spyCh := make(chan typedpath.SlashPath)
-	actual := make([]typedpath.SlashPath, 0)
+	spyCh := make(chan Entry)
+	actual := make([]Entry, 0)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		actual = pathchan.ToSlice(spyCh)
+		actual = chanutil.ToSlice(spyCh)
 		sort.Slice(actual, func(i, j int) bool {
-			return actual[i] < actual[j]
+			return actual[i].Path < actual[j].Path
 		})
 		defer wg.Done()
 	}()
@@ -44,11 +42,11 @@ dir2
 	close(spyCh)
 	wg.Wait()
 
-	expected := []typedpath.SlashPath{
-		"dir1", // Directory should be added automatically (git ls-files does not print any directories)
-		"dir1/fileB",
-		"dir2",
-		"fileA",
+	expected := []Entry{
+		// NOTE: Directory should be added automatically (git ls-files does not print any directories)
+		{Path: "dir1", IsDir: true},
+		{Path: "dir1/fileB", IsDir: false},
+		{Path: "fileA", IsDir: false},
 	}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Log(spyLogger.Logs.String())

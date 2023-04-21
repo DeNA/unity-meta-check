@@ -2,6 +2,7 @@ package checker
 
 import (
 	"fmt"
+	"github.com/DeNA/unity-meta-check/filecollector"
 	"github.com/DeNA/unity-meta-check/unity"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"github.com/DeNA/unity-meta-check/util/pathutil"
@@ -9,41 +10,113 @@ import (
 	"sort"
 )
 
-type CheckingWorker func(ignoreCase bool, reader <-chan typedpath.SlashPath) (*CheckResult, error)
+type CheckingWorker func(rootDirAbs typedpath.RawPath, ignoreCase bool, reader <-chan filecollector.Entry) (*CheckResult, error)
 
 func NewCheckingWorker(requiresMeta unity.MetaNecessity, logger logging.Logger) CheckingWorker {
-	return func(ignoreCase bool, reader <-chan typedpath.SlashPath) (*CheckResult, error) {
+	return func(rootDirAbs typedpath.RawPath, ignoreCase bool, reader <-chan filecollector.Entry) (*CheckResult, error) {
+		entries, err := labelMeta(requiresMeta, reader, logger)
+		if err != nil {
+			return nil, err
+		}
+
 		expectedMetaSet := pathutil.NewPathSet(ignoreCase)
-		// NOTE: This set hold all exist files as elements (without .meta).
-		//       So, the elements may not effective .meta, but it should be allowed.
-		// WHY: See chkworker_test.go
 		allowedMetaSet := pathutil.NewPathSet(ignoreCase)
 		actualMetaSet := pathutil.NewPathSet(ignoreCase)
 
-		for targetPath := range reader {
-			if unity.IsMeta(targetPath) {
-				logger.Debug(fmt.Sprintf("meta found ... %s", targetPath))
-				actualMetaSet.Add(targetPath)
-			} else if requiresMeta(targetPath) {
-				logger.Debug(fmt.Sprintf("needs meta ... %s", targetPath))
-				expectedMetaSet.Add(unity.MetaPath(targetPath))
-				allowedMetaSet.Add(unity.MetaPath(targetPath))
+		for _, entry := range entries {
+			if entry.IsMeta {
+				actualMetaSet.Add(entry.Path)
+			} else if entry.NeedsMeta {
+				expectedMetaSet.Add(unity.MetaPath(entry.Path))
+				allowedMetaSet.Add(unity.MetaPath(entry.Path))
 			} else {
-				allowedMetaSet.Add(unity.MetaPath(targetPath))
-				logger.Debug(fmt.Sprintf("skipped ... %s", targetPath))
+				allowedMetaSet.Add(unity.MetaPath(entry.Path))
 			}
 		}
 
-		missingMeta := expectedMetaSet.Difference(actualMetaSet)
-		sort.Slice(missingMeta, func(i, j int) bool {
-			return missingMeta[i] < missingMeta[j]
-		})
-
-		danglingMeta := actualMetaSet.Difference(allowedMetaSet)
-		sort.Slice(danglingMeta, func(i, j int) bool {
-			return danglingMeta[i] < danglingMeta[j]
-		})
-
-		return NewCheckResult(missingMeta, danglingMeta), nil
+		return NewCheckResult(
+			detectMissing(expectedMetaSet, actualMetaSet),
+			detectDangling(allowedMetaSet, actualMetaSet, entries),
+		), nil
 	}
+}
+
+type entry struct {
+	Path      typedpath.SlashPath
+	IsMeta    bool
+	NeedsMeta bool
+	IsDir     bool
+}
+
+func labelMeta(requiresMetaFunc unity.MetaNecessity, reader <-chan filecollector.Entry, logger logging.Logger) ([]entry, error) {
+	entries := make([]entry, 0)
+	for targetEntry := range reader {
+		isMeta := unity.IsMeta(targetEntry.Path)
+		requiresMeta := requiresMetaFunc(targetEntry.Path)
+
+		if isMeta {
+			logger.Debug(fmt.Sprintf("meta found ... %s", targetEntry.Path))
+		} else if requiresMeta {
+			logger.Debug(fmt.Sprintf("needs meta ... %s", targetEntry.Path))
+		} else {
+			logger.Debug(fmt.Sprintf("skipped ... %s", targetEntry.Path))
+		}
+
+		entries = append(entries, entry{
+			Path:      targetEntry.Path,
+			IsMeta:    isMeta,
+			NeedsMeta: requiresMeta,
+			IsDir:     targetEntry.IsDir,
+		})
+	}
+	return entries, nil
+}
+
+func detectMissing(expectedMetaSet *pathutil.PathSet, actualMetaSet *pathutil.PathSet) []typedpath.SlashPath {
+	missingMeta := expectedMetaSet.Difference(actualMetaSet)
+	sort.Slice(missingMeta, func(i, j int) bool {
+		return missingMeta[i] < missingMeta[j]
+	})
+	return missingMeta
+}
+
+func detectDangling(allowedMetaSet *pathutil.PathSet, actualMetaSet *pathutil.PathSet, entries []entry) []typedpath.SlashPath {
+	pairs := make([]pathutil.PathPair[entry], len(entries))
+	for i, e := range entries {
+		pairs[i] = pathutil.PathPair[entry]{
+			Path:  e.Path,
+			Value: e,
+		}
+	}
+
+	danglingMeta := actualMetaSet.Difference(allowedMetaSet)
+
+	// NOTE: Add directories that contains only dangling meta files.
+	tree := pathutil.NewPathTreeWithValues(pairs...)
+	hasNonDangling := false
+	_ = tree.Postorder(func(path typedpath.SlashPath, p pathutil.PathTreeEntry[entry]) error {
+		// XXX: p.Value == nil indicates the path is complemented. The path get complemented is a directory always.
+		isDir := p.Value == nil || p.Value.IsDir
+		if !isDir {
+			if !p.Value.IsMeta {
+				hasNonDangling = true
+			}
+			return nil
+		}
+
+		if !hasNonDangling {
+			meta := unity.MetaPath(path)
+			if actualMetaSet.Has(meta) {
+				danglingMeta = append(danglingMeta, meta)
+			}
+		}
+		hasNonDangling = false
+		return nil
+	})
+
+	sort.Slice(danglingMeta, func(i, j int) bool {
+		return danglingMeta[i] < danglingMeta[j]
+	})
+
+	return danglingMeta
 }

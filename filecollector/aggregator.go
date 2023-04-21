@@ -10,38 +10,32 @@ import (
 	"sync"
 )
 
-type FileAggregator func(rootDirAbs typedpath.RawPath, opts *Options, ch chan<- typedpath.SlashPath) error
+type FileAggregator func(rootDirAbs typedpath.RawPath, opts *Options, ch chan<- Entry) error
 
 func NewFileAggregator(gitLsFiles git.LsFiles, findRepo repofinder.RepoFinder, logger logging.Logger) FileAggregator {
 	collectFiles := New(gitLsFiles, logger)
 
-	return func(rootDirAbs typedpath.RawPath, opts *Options, ch chan<- typedpath.SlashPath) error {
+	return func(rootDirAbs typedpath.RawPath, opts *Options, ch chan<- Entry) error {
 		var errsMutex sync.Mutex
 		errs := make([]error, 0)
-		foundRepoCh := make(chan *repofinder.FoundRepo)
 
-		go func() {
-			defer close(foundRepoCh)
-			if err := findRepo(foundRepoCh); err != nil {
-				errsMutex.Lock()
-				errs = append(errs, err)
-				errsMutex.Unlock()
-				return
-			}
-		}()
+		foundRepos, err := findRepo()
+		if err != nil {
+			return err
+		}
 
 		var wg sync.WaitGroup
-		for foundRepo := range foundRepoCh {
+		for _, foundRepo := range foundRepos {
 			logger.Info(fmt.Sprintf("repository found: %q (submodule=%t)", foundRepo.RawPath, foundRepo.Type))
 
 			wg.Add(1)
-			go func(foundRepo *repofinder.FoundRepo) {
+			go func(foundRepo repofinder.FoundRepo) {
 				defer wg.Done()
-				ch <- foundRepo.RawPath.ToSlash()
+				ch <- Entry{Path: foundRepo.RawPath.ToSlash(), IsDir: true}
 			}(foundRepo)
 
 			wg.Add(1)
-			go func(foundRepo *repofinder.FoundRepo) {
+			go func(foundRepo repofinder.FoundRepo) {
 				defer wg.Done()
 				if err := collectFiles(rootDirAbs, foundRepo.RawPath, opts, ch); err != nil {
 					errsMutex.Lock()
@@ -52,8 +46,7 @@ func NewFileAggregator(gitLsFiles git.LsFiles, findRepo repofinder.RepoFinder, l
 			}(foundRepo)
 		}
 
-		err := collectFiles(rootDirAbs, ".", opts, ch)
-		if err != nil {
+		if err = collectFiles(rootDirAbs, ".", opts, ch); err != nil {
 			errsMutex.Lock()
 			errs = append(errs, err)
 			errsMutex.Unlock()
