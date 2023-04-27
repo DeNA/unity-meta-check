@@ -12,9 +12,9 @@ import (
 
 func TestCheck(t *testing.T) {
 	strategy := Strategy{
-		CollectFiles: filecollector.StubSuccessfulFileAggregator([]typedpath.SlashPath{
-			"/path/to/Project/Assets/MissingMeta",
-			"/path/to/Project/Assets/DanglingMeta.meta",
+		CollectFiles: filecollector.StubSuccessfulFileAggregator([]filecollector.Entry{
+			{Path: "Assets/MissingMeta", IsDir: false},
+			{Path: "Assets/DanglingMeta.meta", IsDir: false},
 		}),
 		RequiresMeta: unity.ConstMetaNecessity(true),
 	}
@@ -29,16 +29,16 @@ func TestCheck(t *testing.T) {
 
 	if err != nil {
 		t.Log(spyLogger.Logs.String())
-		t.Errorf("want nil, got %#v", err)
+		t.Errorf("want nil, got %s", err.Error())
 		return
 	}
 
 	expected := &CheckResult{
 		MissingMeta: []typedpath.SlashPath{
-			"/path/to/Project/Assets/MissingMeta.meta",
+			"Assets/MissingMeta.meta",
 		},
 		DanglingMeta: []typedpath.SlashPath{
-			"/path/to/Project/Assets/DanglingMeta.meta",
+			"Assets/DanglingMeta.meta",
 		},
 	}
 	if !reflect.DeepEqual(actual, expected) {

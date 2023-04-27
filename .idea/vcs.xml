@@ -7,6 +7,8 @@
     <mapping directory="$PROJECT_DIR$/testdata/ValidProject" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/testdata/ValidProject/Assets/SubDir" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/tool/gh-action/cmd/testdata/InvalidProject" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tool/gh-action/cmd/testdata/InvalidProject/Assets/SubDir" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/tool/gh-action/cmd/testdata/ValidProject" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tool/gh-action/cmd/testdata/ValidProject/Assets/SubDir" vcs="Git" />
   </component>
 </project>

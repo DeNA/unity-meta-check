@@ -6,38 +6,21 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"sort"
-	"sync"
 	"testing"
 )
 
 func TestFind(t *testing.T) {
 	testDir := setUpTestDir()
-	spyCh := make(chan *FoundRepo)
-
-	var actual []*FoundRepo
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		for found := range spyCh {
-			actual = append(actual, found)
-		}
-		sort.Slice(actual, func(i, j int) bool {
-			return actual[i].RawPath < actual[j].RawPath
-		})
-		wg.Done()
-	}()
 
 	findNested := New(testDir, ".")
-	err := findNested(spyCh)
+
+	actual, err := findNested()
 	if err != nil {
 		t.Errorf("want nil, got %#v", err)
 		return
 	}
-	close(spyCh)
 
-	wg.Wait()
-	expected := []*FoundRepo{
+	expected := []FoundRepo{
 		{RepositoryTypeIsNested, "nested1"},
 		{RepositoryTypeIsNested, typedpath.NewRawPath("nested1", "nestedInNested1")},
 		{RepositoryTypeIsSubmodule, "nested2"},
@@ -49,34 +32,18 @@ func TestFind(t *testing.T) {
 	}
 }
 
-
 func TestFindOnRel(t *testing.T) {
 	testDir := setUpTestDir()
-	spyCh := make(chan *FoundRepo)
-
-	var actual []*FoundRepo
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		for found := range spyCh {
-			actual = append(actual, found)
-		}
-		sort.Slice(actual, func(i, j int) bool {
-			return actual[i].RawPath < actual[j].RawPath
-		})
-		wg.Done()
-	}()
 
 	findNested := New(testDir, "nested1")
-	err := findNested(spyCh)
+
+	actual, err := findNested()
 	if err != nil {
 		t.Errorf("want nil, got %#v", err)
 		return
 	}
-	close(spyCh)
 
-	wg.Wait()
-	expected := []*FoundRepo{
+	expected := []FoundRepo{
 		{RepositoryTypeIsNested, "nested1"},
 		{RepositoryTypeIsNested, typedpath.NewRawPath("nested1", "nestedInNested1")},
 	}

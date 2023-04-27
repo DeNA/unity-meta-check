@@ -1,10 +1,10 @@
 package checker
 
 import (
-	"fmt"
+	"github.com/DeNA/unity-meta-check/filecollector"
 	"github.com/DeNA/unity-meta-check/unity"
+	"github.com/DeNA/unity-meta-check/util/chanutil"
 	"github.com/DeNA/unity-meta-check/util/logging"
-	"github.com/DeNA/unity-meta-check/util/pathchan"
 	"github.com/DeNA/unity-meta-check/util/typedpath"
 	"github.com/google/go-cmp/cmp"
 	"reflect"
@@ -12,23 +12,23 @@ import (
 )
 
 func TestNewCheckUnityProject(t *testing.T) {
-	cases := []struct {
-		FoundPaths    []typedpath.SlashPath
-		IgnoreCase    bool
-		Expected      *CheckResult
+	cases := map[string]struct {
+		FoundPaths []filecollector.Entry
+		IgnoreCase bool
+		Expected   *CheckResult
 	}{
-		{
-			FoundPaths: []typedpath.SlashPath{},
+		"no paths found (boundary)": {
+			FoundPaths: []filecollector.Entry{},
 			IgnoreCase: false,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{},
 				DanglingMeta: []typedpath.SlashPath{},
 			},
 		},
-		{
-			FoundPaths: []typedpath.SlashPath{
-				"Assets/OK",
-				"Assets/OK.meta",
+		"success case (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/OK", IsDir: false},
+				{Path: "Assets/OK.meta", IsDir: false},
 			},
 			IgnoreCase: false,
 			Expected: &CheckResult{
@@ -36,96 +36,130 @@ func TestNewCheckUnityProject(t *testing.T) {
 				DanglingMeta: []typedpath.SlashPath{},
 			},
 		},
-		{
-			FoundPaths: []typedpath.SlashPath{
-				"Assets/NG",
+		"several missing metas case (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/NG", IsDir: false},
 			},
-			IgnoreCase:    false,
+			IgnoreCase: false,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{"Assets/NG.meta"},
 				DanglingMeta: []typedpath.SlashPath{},
 			},
 		},
-		{
-			FoundPaths: []typedpath.SlashPath{
-				"Assets/NG",
-				"Assets/OK",
-				"Assets/OK.meta",
+		"first missing metas w/ others case (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/NG", IsDir: false},
+				{Path: "Assets/OK", IsDir: false},
+				{Path: "Assets/OK.meta", IsDir: false},
 			},
-			IgnoreCase:    false,
+			IgnoreCase: false,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{"Assets/NG.meta"},
 				DanglingMeta: []typedpath.SlashPath{},
 			},
 		},
-		{
-			FoundPaths: []typedpath.SlashPath{
-				"Assets/OK",
-				"Assets/OK.meta",
-				"Assets/NG",
+		"last missing metas w/ others case (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/OK", IsDir: false},
+				{Path: "Assets/OK.meta", IsDir: false},
+				{Path: "Assets/NG", IsDir: false},
 			},
-			IgnoreCase:    false,
+			IgnoreCase: false,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{"Assets/NG.meta"},
 				DanglingMeta: []typedpath.SlashPath{},
 			},
 		},
-
-		{
-			FoundPaths: []typedpath.SlashPath{
-				"Assets/NG.meta",
+		"dangling meta (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/NG.meta", IsDir: false},
 			},
-			IgnoreCase:    false,
+			IgnoreCase: false,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{},
 				DanglingMeta: []typedpath.SlashPath{"Assets/NG.meta"},
 			},
 		},
-		{
-			FoundPaths: []typedpath.SlashPath{
-				"Assets/OK",
-				"Assets/OK.meta",
-				"Assets/NG.meta",
+		"last dangling meta w/ others (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/OK", IsDir: false},
+				{Path: "Assets/OK.meta", IsDir: false},
+				{Path: "Assets/NG.meta", IsDir: false},
 			},
-			IgnoreCase:    false,
+			IgnoreCase: false,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{},
 				DanglingMeta: []typedpath.SlashPath{"Assets/NG.meta"},
 			},
 		},
-		{
-			FoundPaths: []typedpath.SlashPath{
-				"Assets/NG1",
-				"Assets/NG2.meta",
+		"both missing dangling meta (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/NG1", IsDir: false},
+				{Path: "Assets/NG2.meta", IsDir: false},
 			},
-			IgnoreCase:    false,
+			IgnoreCase: false,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{"Assets/NG1.meta"},
 				DanglingMeta: []typedpath.SlashPath{"Assets/NG2.meta"},
 			},
 		},
-		{
-			FoundPaths: []typedpath.SlashPath{
+		"directory contain only dangling meta (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/Dangling", IsDir: true},
+				{Path: "Assets/Dangling.meta", IsDir: false},
+				{Path: "Assets/Dangling/Dangling1", IsDir: true},
+				{Path: "Assets/Dangling/Dangling1.meta", IsDir: false},
+				{Path: "Assets/Dangling/Dangling1/Dangling1.meta", IsDir: false},
+				{Path: "Assets/Dangling/Dangling1/Dangling2.meta", IsDir: false},
+				{Path: "Assets/Dangling/Dangling2", IsDir: true},
+				{Path: "Assets/Dangling/Dangling2.meta", IsDir: false},
+				{Path: "Assets/Dangling/Dangling2/Dangling3.meta", IsDir: false},
+			},
+			IgnoreCase: false,
+			Expected: &CheckResult{
+				MissingMeta: []typedpath.SlashPath{},
+				DanglingMeta: []typedpath.SlashPath{
+					"Assets/Dangling.meta",
+					"Assets/Dangling/Dangling1.meta",
+					"Assets/Dangling/Dangling1/Dangling1.meta",
+					"Assets/Dangling/Dangling1/Dangling2.meta",
+					"Assets/Dangling/Dangling2.meta",
+					"Assets/Dangling/Dangling2/Dangling3.meta",
+				},
+			},
+		},
+		"needless meta (representative)": {
+			FoundPaths: []filecollector.Entry{
 				// NOTE: This path is not in Assets, so .meta is needless. But this case frequently happen by several
 				//       reason e.g. the package including examples, but it is not used by the Unity project.
 				//       So it should not be counted as a dangling.
-				"foo/bar",
-				"foo/bar.meta",
+				{Path: "foo/bar", IsDir: false},
+				{Path: "foo/bar.meta", IsDir: false},
 			},
-			IgnoreCase:    false,
+			IgnoreCase: false,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{},
 				DanglingMeta: []typedpath.SlashPath{},
 			},
 		},
 
-		// Ignore case true.
-		{
-			FoundPaths: []typedpath.SlashPath{
-				"Assets/NG1",
-				"Assets/ng1.meta",
+		"case-sensitive case (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/NG1", IsDir: false},
+				{Path: "Assets/ng1.meta", IsDir: false},
 			},
-			IgnoreCase:    true,
+			IgnoreCase: false,
+			Expected: &CheckResult{
+				MissingMeta:  []typedpath.SlashPath{"Assets/NG1.meta"},
+				DanglingMeta: []typedpath.SlashPath{"Assets/ng1.meta"},
+			},
+		},
+		"case-insensitive case (representative)": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/NG1", IsDir: false},
+				{Path: "Assets/ng1.meta", IsDir: false},
+			},
+			IgnoreCase: true,
 			Expected: &CheckResult{
 				MissingMeta:  []typedpath.SlashPath{},
 				DanglingMeta: []typedpath.SlashPath{},
@@ -133,14 +167,14 @@ func TestNewCheckUnityProject(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(fmt.Sprintf("%v IgnoreCase=%v", c.FoundPaths, c.IgnoreCase), func(t *testing.T) {
+	for desc, c := range cases {
+		t.Run(desc, func(t *testing.T) {
 			spyLogger := logging.SpyLogger()
-			foundPaths := pathchan.FromSlice(c.FoundPaths)
+			entries := chanutil.FromSlice(c.FoundPaths)
 
 			requiresMeta := unity.NewMetaNecessityInUnityProject([]typedpath.SlashPath{})
 			check := NewCheckingWorker(requiresMeta, spyLogger)
-			actual, err := check(c.IgnoreCase, foundPaths)
+			actual, err := check(".", c.IgnoreCase, entries)
 			if err != nil {
 				t.Errorf("want nil, got %#v", err)
 				return

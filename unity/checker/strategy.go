@@ -48,7 +48,7 @@ func NewStrategySelector(findPackages unity.FindPackages, lsFiles git.LsFiles, l
 
 func NewRepoFinderForUnityProj(rootDirAbs typedpath.RawPath, opts *Options, foundPackages []*unity.FoundPackage) repofinder.RepoFinder {
 	if opts.IgnoreSubmodulesAndNested {
-		return repofinder.Empty
+		return repofinder.StubRepoFinder(nil, nil)
 	}
 
 	repoFinders := make([]repofinder.RepoFinder, len(foundPackages)+1)
@@ -64,7 +64,7 @@ func NewRepoFinderForUnityProj(rootDirAbs typedpath.RawPath, opts *Options, foun
 
 func NewRepoFinderFactoryForUPM(rootDirAbs typedpath.RawPath, opts *Options) repofinder.RepoFinder {
 	if opts.IgnoreSubmodulesAndNested {
-		return repofinder.Empty
+		return repofinder.StubRepoFinder(nil, nil)
 	}
 
 	return repofinder.New(rootDirAbs, ".")

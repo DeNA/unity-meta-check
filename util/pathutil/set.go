@@ -31,11 +31,11 @@ func (s *PathSet) Add(path typedpath.SlashPath) {
 	s.set.Add(string(path))
 }
 
-func (s PathSet) Has(path typedpath.SlashPath) bool {
+func (s *PathSet) Has(path typedpath.SlashPath) bool {
 	return s.set.Has(string(path))
 }
 
-func (s PathSet) Difference(other *PathSet) []typedpath.SlashPath {
+func (s *PathSet) Difference(other *PathSet) []typedpath.SlashPath {
 	diff := s.set.Difference(other.set)
 	result := make([]typedpath.SlashPath, diff.Size())
 	i := 0
@@ -47,6 +47,6 @@ func (s PathSet) Difference(other *PathSet) []typedpath.SlashPath {
 	return result
 }
 
-func (s PathSet) Len() int {
+func (s *PathSet) Len() int {
 	return s.set.Len()
 }

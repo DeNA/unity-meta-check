@@ -24,7 +24,7 @@ func NewChecker(selectStrategy StrategySelector, logger logging.Logger) Checker 
 
 func newCheckerByStrategy(strategy Strategy, logger logging.Logger) Checker {
 	return func(rootDirAbs typedpath.RawPath, opts *Options) (*CheckResult, error) {
-		ch := make(chan typedpath.SlashPath)
+		ch := make(chan filecollector.Entry)
 
 		var wg sync.WaitGroup
 		var errsMu sync.Mutex
@@ -43,7 +43,7 @@ func newCheckerByStrategy(strategy Strategy, logger logging.Logger) Checker {
 		}()
 
 		check := NewCheckingWorker(strategy.RequiresMeta, logger)
-		result, err := check(opts.IgnoreCase, ch)
+		result, err := check(rootDirAbs, opts.IgnoreCase, ch)
 		if err != nil {
 			errsMu.Lock()
 			errs = append(errs, err)

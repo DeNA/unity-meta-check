@@ -66,6 +66,7 @@ missing Assets/SubDir/SubDirFile.meta
 missing LocalPackages/com.example.local.pkg/LocalPkgMissing.meta
 missing Packages/com.example.pkg/PkgMissing.meta
 dangling Assets/AssetsDangling.meta
+dangling Assets/Dangling/Dangling.meta
 dangling LocalPackages/com.example.local.pkg/LocalPkgDangling.meta
 dangling Packages/com.example.pkg/PkgDangling.meta
 `

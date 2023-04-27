@@ -10,75 +10,78 @@ import (
 
 func TestNewPathTree(t *testing.T) {
 	cases := []struct {
-		rootPaths []typedpath.SlashPath
-		expected  *PathTree
+		rootPaths []PathPair[string]
+		expected  PathTree[string]
 	}{
 		{
-			[]typedpath.SlashPath{},
-			&PathTree{false, PathTreeMap{}},
+			[]PathPair[string]{},
+			PathTree[string]{},
 		},
 		{
-			[]typedpath.SlashPath{""},
-			&PathTree{true, PathTreeMap{}},
+			[]PathPair[string]{
+				{"", ""},
+			},
+			PathTree[string]{},
 		},
 		{
-			[]typedpath.SlashPath{"a"},
-			&PathTree{
-				false,
-				PathTreeMap{
-					"a": &PathTree{true, PathTreeMap{}},
+			[]PathPair[string]{
+				{"a", "A"},
+			},
+			PathTree[string]{
+				"a": &PathTreeEntry[string]{
+					Value:   ptrString("A"),
+					Subtree: PathTree[string]{},
 				},
 			},
 		},
 		{
-			[]typedpath.SlashPath{"a/b"},
-			&PathTree{
-				false,
-				PathTreeMap{
-					"a": &PathTree{
-						false,
-						PathTreeMap{
-							"b": &PathTree{true, PathTreeMap{}},
-						},
+			[]PathPair[string]{
+				{"a/b", "a/b"},
+			},
+			PathTree[string]{
+				"a": &PathTreeEntry[string]{
+					nil,
+					PathTree[string]{
+						"b": &PathTreeEntry[string]{ptrString("a/b"), PathTree[string]{}},
 					},
 				},
 			},
 		},
 		{
-			[]typedpath.SlashPath{"a", "b"},
-			&PathTree{
-				false,
-				PathTreeMap{
-					"a": &PathTree{true, PathTreeMap{}},
-					"b": &PathTree{true, PathTreeMap{}},
-				},
+			[]PathPair[string]{
+				{"a", "A"},
+				{"b", "B"},
+			},
+			PathTree[string]{
+				"a": &PathTreeEntry[string]{ptrString("A"), PathTree[string]{}},
+				"b": &PathTreeEntry[string]{ptrString("B"), PathTree[string]{}},
 			},
 		},
 		{
-			[]typedpath.SlashPath{"a/1", "a/2"},
-			&PathTree{
-				false,
-				PathTreeMap{
-					"a": &PathTree{
-						false,
-						PathTreeMap{
-							"1": &PathTree{true, PathTreeMap{}},
-							"2": &PathTree{true, PathTreeMap{}},
-						},
+			[]PathPair[string]{
+				{"a/1", "A/1"},
+				{"a/2", "A/2"},
+			},
+			PathTree[string]{
+				"a": &PathTreeEntry[string]{
+					nil,
+					PathTree[string]{
+						"1": &PathTreeEntry[string]{ptrString("A/1"), PathTree[string]{}},
+						"2": &PathTreeEntry[string]{ptrString("A/2"), PathTree[string]{}},
 					},
 				},
 			},
 		},
 		{
-			[]typedpath.SlashPath{"a", "a/b"},
-			&PathTree{
-				false,
-				PathTreeMap{
-					"a": &PathTree{
-						true,
-						PathTreeMap{
-							"b": &PathTree{true, PathTreeMap{}},
-						},
+			[]PathPair[string]{
+				{"a", "A"},
+				{"a/b", "A/B"},
+			},
+			PathTree[string]{
+				"a": &PathTreeEntry[string]{
+					ptrString("A"),
+					PathTree[string]{
+						"b": &PathTreeEntry[string]{ptrString("A/B"), PathTree[string]{}},
 					},
 				},
 			},
@@ -87,7 +90,7 @@ func TestNewPathTree(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("%v", c.rootPaths), func(t *testing.T) {
-			actual := NewPathTree(c.rootPaths...)
+			actual := NewPathTreeWithValues[string](c.rootPaths...)
 
 			if !reflect.DeepEqual(actual, c.expected) {
 				t.Error(cmp.Diff(c.expected, actual))
@@ -166,4 +169,32 @@ func TestPathTree_Member(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPathTree_Postorder(t *testing.T) {
+	tree := NewPathTree(
+		"a/b",
+		"a/b/d",
+		"a/c",
+	)
+
+	trace := make([]typedpath.SlashPath, 0)
+	_ = tree.Postorder(func(b typedpath.SlashPath, p PathTreeEntry[struct{}]) error {
+		trace = append(trace, b)
+		return nil
+	})
+
+	expected := []typedpath.SlashPath{
+		"a/b/d",
+		"a/b",
+		"a/c",
+		"a",
+	}
+	if !reflect.DeepEqual(expected, trace) {
+		t.Error(cmp.Diff(expected, trace))
+	}
+}
+
+func ptrString(s string) *string {
+	return &s
 }
