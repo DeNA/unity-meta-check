@@ -1,6 +1,9 @@
 package pathutil
 
-import "github.com/DeNA/unity-meta-check/util/typedpath"
+import (
+	"github.com/DeNA/unity-meta-check/util/typedpath"
+	"sort"
+)
 
 type PathTree[T interface{}] map[typedpath.BaseName]*PathTreeEntry[T]
 type PathTreeEntry[T interface{}] struct {
@@ -10,6 +13,10 @@ type PathTreeEntry[T interface{}] struct {
 type PathPair[T interface{}] struct {
 	Path  typedpath.SlashPath
 	Value T
+}
+type KeyValuePair[T interface{}] struct {
+	BaseName typedpath.BaseName
+	Entry    *PathTreeEntry[T]
 }
 
 func NewPathTree(paths ...typedpath.SlashPath) PathTree[struct{}] {
@@ -64,8 +71,8 @@ func (t PathTree[T]) Member(pathElements []typedpath.BaseName) bool {
 }
 
 func (t PathTree[T]) Postorder(f func(typedpath.SlashPath, PathTreeEntry[T]) error) error {
-	for baseName, subtree := range t {
-		if err := subtree.postorder(".", baseName, f); err != nil {
+	for _, kv := range sortDict(t) {
+		if err := kv.Entry.postorder(".", kv.BaseName, f); err != nil {
 			return err
 		}
 	}
@@ -94,10 +101,21 @@ func (e PathTreeEntry[T]) postorder(relPath typedpath.SlashPath, baseName typedp
 		path = relPath.JoinBaseName(baseName)
 	}
 
-	for subBaseName, subtree := range e.Subtree {
-		if err := subtree.postorder(path, subBaseName, f); err != nil {
+	for _, kv := range sortDict(e.Subtree) {
+		if err := kv.Entry.postorder(path, kv.BaseName, f); err != nil {
 			return err
 		}
 	}
 	return f(path, e)
+}
+
+func sortDict[T interface{}](tree PathTree[T]) []KeyValuePair[T] {
+	kvs := make([]KeyValuePair[T], 0, len(tree))
+	for baseName, entry := range tree {
+		kvs = append(kvs, KeyValuePair[T]{baseName, entry})
+	}
+	sort.Slice(kvs, func(i, j int) bool {
+		return kvs[i].BaseName < kvs[j].BaseName
+	})
+	return kvs
 }
