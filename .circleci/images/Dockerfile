@@ -1,5 +1,5 @@
 # image-name: ghcr.io/dena/unity-meta-check/unity-meta-check-circleci
-FROM golang:1.16-buster as builder
+FROM golang:1.19-buster as builder
 WORKDIR /go/src/unity-meta-check
 COPY . .
 RUN make out/unity-meta-check-linux-amd64 out/unity-meta-check-junit-linux-amd64 out/unity-meta-check-github-pr-comment-linux-amd64 out/unity-meta-autofix-linux-amd64 && \
