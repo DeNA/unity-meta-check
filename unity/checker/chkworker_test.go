@@ -165,6 +165,29 @@ func TestNewCheckUnityProject(t *testing.T) {
 				DanglingMeta: []typedpath.SlashPath{},
 			},
 		},
+		// https://github.com/DeNA/unity-meta-check/issues/26
+		"a directory contains a directory only contains normal file": {
+			FoundPaths: []filecollector.Entry{
+				{Path: "Assets/A", IsDir: true},
+				{Path: "Assets/A.meta", IsDir: true},
+				{Path: "Assets/A/B", IsDir: true},
+				{Path: "Assets/A/B.meta", IsDir: false},
+				{Path: "Assets/A/B/C.cs", IsDir: false},
+				{Path: "Assets/A/B/C.cs.meta", IsDir: false},
+				{Path: "Assets/A/D", IsDir: true},
+				{Path: "Assets/A/D.meta", IsDir: false},
+				{Path: "Assets/A/D/E", IsDir: true},
+				{Path: "Assets/A/D/E.meta", IsDir: false},
+			},
+			IgnoreCase: false,
+			Expected: &CheckResult{
+				MissingMeta: []typedpath.SlashPath{},
+				DanglingMeta: []typedpath.SlashPath{
+					"Assets/A/D.meta",
+					"Assets/A/D/E.meta",
+				},
+			},
+		},
 	}
 
 	for desc, c := range cases {

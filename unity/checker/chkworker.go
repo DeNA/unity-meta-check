@@ -55,11 +55,11 @@ func labelMeta(requiresMetaFunc unity.MetaNecessity, reader <-chan filecollector
 		requiresMeta := requiresMetaFunc(targetEntry.Path)
 
 		if isMeta {
-			logger.Debug(fmt.Sprintf("meta found ... %s", targetEntry.Path))
+			logger.Debug(fmt.Sprintf("meta found .... %s", targetEntry.Path))
 		} else if requiresMeta {
-			logger.Debug(fmt.Sprintf("needs meta ... %s", targetEntry.Path))
+			logger.Debug(fmt.Sprintf("asset found ... %s", targetEntry.Path))
 		} else {
-			logger.Debug(fmt.Sprintf("skipped ... %s", targetEntry.Path))
+			logger.Debug(fmt.Sprintf("skipped ....... %s", targetEntry.Path))
 		}
 
 		entries = append(entries, entry{
@@ -93,15 +93,30 @@ func detectDangling(allowedMetaSet *pathutil.PathSet, actualMetaSet *pathutil.Pa
 
 	// NOTE: Add directories that contains only dangling meta files.
 	tree := pathutil.NewPathTreeWithValues(pairs...)
-	hasNonDangling := false
+	nonDanglingDirs := make(map[typedpath.SlashPath]bool)
 	_ = tree.Postorder(func(path typedpath.SlashPath, p pathutil.PathTreeEntry[entry]) error {
 		// XXX: p.Value == nil indicates the path is complemented. The path get complemented is a directory always.
-		isDir := p.Value == nil || p.Value.IsDir
+		isComplementedDir := p.Value == nil
+		isDir := isComplementedDir || p.Value.IsDir
 		if !isDir {
-			if !p.Value.IsMeta {
-				hasNonDangling = true
-			}
 			return nil
+		}
+
+		hasNonDangling := false
+		for baseName, subEntry := range p.Subtree {
+			if subEntry.Value.IsDir {
+				subEntryPath := path.JoinBaseName(baseName)
+				// NOTE: nonDanglingDirs[subEntryPath] always exist because it is processed by postorder.
+				if nonDanglingDirs[subEntryPath] {
+					hasNonDangling = true
+					break
+				}
+			} else {
+				if !subEntry.Value.IsMeta {
+					hasNonDangling = true
+					break
+				}
+			}
 		}
 
 		if !hasNonDangling {
@@ -110,7 +125,7 @@ func detectDangling(allowedMetaSet *pathutil.PathSet, actualMetaSet *pathutil.Pa
 				danglingMeta = append(danglingMeta, meta)
 			}
 		}
-		hasNonDangling = false
+		nonDanglingDirs[path] = hasNonDangling
 		return nil
 	})
 
