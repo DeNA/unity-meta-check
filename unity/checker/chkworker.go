@@ -55,11 +55,11 @@ func labelMeta(requiresMetaFunc unity.MetaNecessity, reader <-chan filecollector
 		requiresMeta := requiresMetaFunc(targetEntry.Path)
 
 		if isMeta {
-			logger.Debug(fmt.Sprintf("meta found ... %s", targetEntry.Path))
+			logger.Debug(fmt.Sprintf("meta found .... %s", targetEntry.Path))
 		} else if requiresMeta {
-			logger.Debug(fmt.Sprintf("needs meta ... %s", targetEntry.Path))
+			logger.Debug(fmt.Sprintf("asset found ... %s", targetEntry.Path))
 		} else {
-			logger.Debug(fmt.Sprintf("skipped ... %s", targetEntry.Path))
+			logger.Debug(fmt.Sprintf("skipped ....... %s", targetEntry.Path))
 		}
 
 		entries = append(entries, entry{
