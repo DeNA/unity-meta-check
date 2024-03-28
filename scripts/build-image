@@ -34,17 +34,17 @@ main() {
 		local image
 		image="$("$BASE_DIR/scripts/print-image-name" < "$DOCKERFILE")"
 
-		docker build -t "$image:$version" -f "$DOCKERFILE" .
+		docker build --platform linux/amd64 -t "$image:$version" -f "$DOCKERFILE" .
 		if [[ "$arg" == "--latest" ]]; then
 			docker tag "$image:$version" "$image:latest"
 		fi
 
-		docker build -t "$gh_action_image:$version" -f "$GH_ACTION_DOCKERFILE" .
+		docker build --platform linux/amd64 -t "$gh_action_image:$version" -f "$GH_ACTION_DOCKERFILE" .
 		if [[ "$arg" == "--latest" ]]; then
 			docker tag "$gh_action_image:$version" "$gh_action_image:latest"
 		fi
 
-		docker build -t "$circleci_image:$version" -f "$CIRCLECI_DOCKERFILE" .
+		docker build --platform linux/amd64 -t "$circleci_image:$version" -f "$CIRCLECI_DOCKERFILE" .
 		if [[ "$arg" == "--latest" ]]; then
 			docker tag "$circleci_image:$version" "$circleci_image:latest"
 		fi
