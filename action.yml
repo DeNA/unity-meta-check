@@ -88,7 +88,7 @@ inputs:
 
 runs:
   using: "docker"
-  image: "docker://ghcr.io/dena/unity-meta-check/unity-meta-check-gh-action:3.2.1"
+  image: "docker://ghcr.io/dena/unity-meta-check/unity-meta-check-gh-action:3.2.2-dev1"
   args:
     - "-inputs-json"
     - "${{ toJSON(inputs) }}"
