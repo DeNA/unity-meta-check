@@ -53,7 +53,7 @@ func Main(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus
 	//
 	gitGlobalConfig := git.NewGlobalConfig(logger)
 	if err := gitGlobalConfig(testutil.SpyWriteCloser(nil), "--add", "safe.directory", "*"); err != nil {
-		logger.Error("failed to add '*' to safe.directory")
+		logger.Error(fmt.Sprintf("failed to add '*' to safe.directory: %s", err.Error()))
 		return cli.ExitAbnormal
 	}
 
