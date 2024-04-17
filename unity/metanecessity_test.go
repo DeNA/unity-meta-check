@@ -17,6 +17,12 @@ func TestNewMetaNecessityInUnityProject(t *testing.T) {
 		{"Packages/com.my.pkg/README.md", true},
 		// https://docs.unity3d.com/2020.2/Documentation/Manual/cus-layout.html
 		{"LocalPackages/com.my.local.pkg/README.md", true},
+		// https://docs.unity3d.com/ja/2023.1/Manual/SpecialFolders.html
+		{"Assets/Plugins/Foo.xcframework", true},
+		{"Assets/Plugins/Foo.androidlib", true},
+		{"Assets/Plugins/Foo.androidpack", true},
+		{"Assets/Plugins/Foo.bundle", true},
+		{"Assets/Plugins/Foo.framework", true},
 
 		{"", false},
 		{".git", false},
@@ -37,6 +43,14 @@ func TestNewMetaNecessityInUnityProject(t *testing.T) {
 		{"LocalPackages", false},
 		{"LocalPackages/com.my.local.pkg", false},
 		{"LocalPackages/com.my.local.pkg/Documentation~", false},
+
+		// https://docs.unity3d.com/ja/2023.1/Manual/SpecialFolders.html
+		{"Assets/Plugins/Foo.bundle/Contents/Info.plist", false},
+		{"Assets/Plugins/Foo.framework/Versions/A/Foo", false},
+		{"Assets/Plugins/Foo.xcframework/Info.plist", false},
+		{"Assets/Plugins/Foo.xcframework/ios-armv7_arm64/Foo.xcframework/Info.plist", false},
+		{"Assets/Plugins/Foo.androidlib/AndroidManifest.xml", false},
+		{"Assets/Plugins/Foo.androidpack/src/main/assets/Bar.bundle", false},
 	}
 
 	for _, c := range cases {
@@ -80,11 +94,26 @@ func TestNewMetaNecessityInUnityProjectSubDir(t *testing.T) {
 		{"Tests/Editor/EditorExampleTest.cs", true},
 		{"lib/native.a", true},
 
+		// https://docs.unity3d.com/ja/2023.1/Manual/SpecialFolders.html
+		{"Runtime/Foo.bundle", true},
+		{"Runtime/Foo.framework", true},
+		{"Runtime/Foo.xcframework", true},
+		{"Runtime/Foo.androidlib", true},
+		{"Runtime/Foo.androidpack", true},
+
 		{"", false},
 		{".git", false},
 		{"Runtime.meta", false},
 		{"Documentation~", false},
 		{"Documentation~/com.my.pkg.md", false},
+
+		// https://docs.unity3d.com/ja/2023.1/Manual/SpecialFolders.html
+		{"Runtime/Foo.bundle/Contents/Info.plist", false},
+		{"Runtime/Foo.framework/Versions/A/Foo", false},
+		{"Runtime/Foo.xcframework/Info.plist", false},
+		{"Runtime/Foo.xcframework/ios-armv7_arm64/Foo.xcframework/Info.plist", false},
+		{"Runtime/Foo.androidlib/AndroidManifest.xml", false},
+		{"Runtime/Foo.androidpack/src/main/assets/Bar.bundle", false},
 	}
 
 	for _, c := range cases {
@@ -101,19 +130,18 @@ func TestNewMetaNecessityInUnityProjectSubDir(t *testing.T) {
 	}
 }
 
-
 func TestTrimMeta(t *testing.T) {
-	cases := []struct{
+	cases := []struct {
 		SlashPath typedpath.SlashPath
-		Expected typedpath.SlashPath
-	} {
+		Expected  typedpath.SlashPath
+	}{
 		{
 			SlashPath: "path/to/foo.meta",
-			Expected: "path/to/foo",
+			Expected:  "path/to/foo",
 		},
 		{
 			SlashPath: "path/to/test.meta",
-			Expected: "path/to/test",
+			Expected:  "path/to/test",
 		},
 	}
 
