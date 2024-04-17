@@ -62,6 +62,7 @@ func TestInvalid(t *testing.T) {
 
 	actualStdout := stdout.Captured.String()
 	expectedStdout := `missing Assets/AssetsMissing.meta
+missing Assets/Plugins/SpecialFolder.framework.meta
 missing Assets/SubDir/SubDirFile.meta
 missing LocalPackages/com.example.local.pkg/LocalPkgMissing.meta
 missing Packages/com.example.pkg/PkgMissing.meta
