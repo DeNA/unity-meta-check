@@ -9,13 +9,10 @@ import (
 	"github.com/DeNA/unity-meta-check/util/cli"
 	"github.com/DeNA/unity-meta-check/version"
 	"io"
-	"time"
 )
 
 func NewMain() cli.Command {
 	return func(args []string, procInout cli.ProcessInout, env cli.Env) cli.ExitStatus {
-		startTime := time.Now()
-
 		opts, err := options.BuildOptions(args, procInout)
 		if err != nil {
 			if err != flag.ErrHelp {
@@ -32,7 +29,7 @@ func NewMain() cli.Command {
 		parse := report.NewParser()
 		result := parse(io.TeeReader(procInout.Stdin, procInout.Stdout))
 
-		if err := junit.WriteToFile(result, startTime, opts.OutPath); err != nil {
+		if err := junit.WriteToFile(result, opts.OutPath); err != nil {
 			_, _ = fmt.Fprintln(procInout.Stderr, err.Error())
 			return cli.ExitAbnormal
 		}
@@ -43,4 +40,3 @@ func NewMain() cli.Command {
 		return cli.ExitNormal
 	}
 }
-
