@@ -10,7 +10,6 @@ import (
 	"github.com/DeNA/unity-meta-check/unity/checker"
 	"github.com/DeNA/unity-meta-check/util/logging"
 	"io"
-	"time"
 )
 
 type Runner func(opts *Options) (bool, error)
@@ -25,8 +24,6 @@ func NewRunner(
 	logger logging.Logger,
 ) Runner {
 	return func(opts *Options) (bool, error) {
-		startTime := time.Now()
-
 		logger.Debug(fmt.Sprintf("check: %#v", opts.CheckerOpts))
 		resultNotFiltered, err := check(opts.RootDirAbs, opts.CheckerOpts)
 		if err != nil {
@@ -57,7 +54,7 @@ func NewRunner(
 
 		if opts.EnableJUnit {
 			logger.Debug(fmt.Sprintf("write junit report: %q", opts.JUnitOutPath))
-			if err := writeJunitXML(resultFiltered, startTime, opts.JUnitOutPath); err != nil {
+			if err := writeJunitXML(resultFiltered, opts.JUnitOutPath); err != nil {
 				return false, err
 			}
 		} else {
