@@ -15,7 +15,7 @@ $ cd path/to/unity-meta-check
 
 $ # Write the new version to deploy into version.go
 $ edit ./version/version.go
-$ go run ./tool/gh-action-yamo-gen/main.go ./action.yml
+$ go run ./tool/gh-action/action-yaml-gen/main.go ./action.yml
 $ git add ./version/version.go ./action.yml
 $ git commit -m "Bump to $(./scripts/print-version)"
 $ git push
