@@ -1,5 +1,5 @@
 # image-name: ghcr.io/dena/unity-meta-check/unity-meta-check
-FROM golang:1.19-buster as builder
+FROM golang:1.22-bookworm as builder
 WORKDIR /go/src/unity-meta-check
 COPY . .
 RUN make out/unity-meta-check-linux-amd64 out/unity-meta-check-junit-linux-amd64 out/unity-meta-check-github-pr-comment-linux-amd64 out/unity-meta-autofix-linux-amd64 && \
@@ -8,7 +8,7 @@ RUN make out/unity-meta-check-linux-amd64 out/unity-meta-check-junit-linux-amd64
 	mv ./out/unity-meta-check-github-pr-comment-linux-amd64 ./out/unity-meta-check-github-pr-comment && \
 	mv ./out/unity-meta-autofix-linux-amd64 ./out/unity-meta-autofix
 
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 RUN apt-get update \
 	&& apt-get install --yes --no-install-recommends git \
 	&& apt-get clean \

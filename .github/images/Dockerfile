@@ -1,10 +1,10 @@
 # image-name: ghcr.io/dena/unity-meta-check/unity-meta-check-gh-action
-FROM golang:1.19-buster as builder
+FROM golang:1.22-bookworm as builder
 WORKDIR /go/src/unity-meta-check
 COPY . .
 RUN make out/gh-action-linux-amd64 && mv ./out/gh-action-linux-amd64 ./out/gh-action
 
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 RUN apt-get update \
 	&& apt-get install --yes --no-install-recommends git ca-certificates \
 	&& apt-get clean \
