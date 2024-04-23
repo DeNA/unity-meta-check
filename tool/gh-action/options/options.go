@@ -19,10 +19,10 @@ type Parser func(args []string, procInout cli.ProcessInout, env cli.Env) (*Optio
 
 func NewParser() Parser {
 	return func(args []string, procInout cli.ProcessInout, env cli.Env) (*Options, error) {
-		flags := flag.NewFlagSet("unity-meta-check-gh-action", flag.ContinueOnError)
+		flags := flag.NewFlagSet("gh-action", flag.ContinueOnError)
 		flags.SetOutput(procInout.Stderr)
 		flags.Usage = func() {
-			_, _ = fmt.Fprintln(flags.Output(), "usage: unity-meta-check-gh-action -inputs-json <json>")
+			_, _ = fmt.Fprintln(flags.Output(), "usage: gh-action -inputs-json <json>")
 			flags.PrintDefaults()
 		}
 
