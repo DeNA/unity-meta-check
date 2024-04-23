@@ -1,7 +1,8 @@
 #!/bin/bash
-set -euo pipefail
+set -euox pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
+BUILDER_DOCKERFILE="${BASE_DIR}/build.Dockerfile"
 DOCKERFILE="${BASE_DIR}/Dockerfile"
 GH_ACTION_DOCKERFILE="${BASE_DIR}/.github/images/Dockerfile"
 CIRCLECI_DOCKERFILE="${BASE_DIR}/.circleci/images/Dockerfile"
@@ -25,6 +26,9 @@ main() {
 		local version
 		version="$("$BASE_DIR/scripts/print-version")"
 
+		local builder_image
+		builder_image="$("$BASE_DIR/scripts/print-image-name" < "$BUILDER_DOCKERFILE")"
+
 		local circleci_image
 		circleci_image="$("$BASE_DIR/scripts/print-image-name" < "$CIRCLECI_DOCKERFILE")"
 
@@ -38,6 +42,9 @@ main() {
 			docker run --privileged --rm tonistiigi/binfmt --install all
 			docker buildx create --name unity-meta-check-driver --driver docker-container --bootstrap
 		fi
+
+		# NOTE: --push is necessary, because --load is not supported for multi-platform build yet.
+		docker buildx build --builder unity-meta-check-driver --platform linux/arm64,linux/amd64 -t "$builder_image:latest" -f "$BUILDER_DOCKERFILE" . --push
 
 		docker buildx build --builder unity-meta-check-driver --platform linux/arm64,linux/amd64 -t "$image:$version" -f "$DOCKERFILE" .
 		if [[ "$arg" == "--latest" ]]; then
