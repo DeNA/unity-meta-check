@@ -64,6 +64,7 @@ main() {
 				-t "$image:latest" \
 				-f "$DOCKERFILE" .
 		else
+			docker buildx build \
 				--builder unity-meta-check-driver \
 				--platform linux/arm64,linux/amd64 \
 				--push \
