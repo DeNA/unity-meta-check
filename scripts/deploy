@@ -67,11 +67,9 @@ main() {
 		./scripts/deploy-bins
 
 		if [[ "$arg" == "--latest" ]]; then
-			./scripts/build-image --latest
-			./scripts/push-image --latest
+			./scripts/deploy-images --latest
 		else
-			./scripts/build-image
-			./scripts/push-image
+			./scripts/deploy-images
 		fi
 	)
 }

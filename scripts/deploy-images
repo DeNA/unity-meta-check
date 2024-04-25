@@ -10,7 +10,7 @@ CIRCLECI_DOCKERFILE="${BASE_DIR}/.circleci/images/Dockerfile"
 
 usage() {
 	cat - 1>&2 <<-EOS
-usage: build-image [<options>]
+usage: deploy-images [<options>]
 
 OPTIONS
 	-h, --help    print this usage
@@ -48,21 +48,62 @@ main() {
 		fi
 
 		# NOTE: --push is necessary, because --load is not supported for multi-platform build yet.
-		docker buildx build --builder unity-meta-check-driver --platform linux/arm64,linux/amd64 -t "$builder_image:latest" -f "$BUILDER_DOCKERFILE" . --push
+		docker buildx build \
+			--builder unity-meta-check-driver \
+			--platform linux/arm64,linux/amd64 \
+			--push \
+			-t "$builder_image:latest" \
+			-f "$BUILDER_DOCKERFILE" .
 
-		docker buildx build --builder unity-meta-check-driver --platform linux/arm64,linux/amd64 -t "$image:$version" -f "$DOCKERFILE" .
 		if [[ "$arg" == "--latest" ]]; then
-			docker tag "$image:$version" "$image:latest"
+			docker buildx build \
+				--builder unity-meta-check-driver \
+				--platform linux/arm64,linux/amd64 \
+				--push \
+				-t "$image:$version" \
+				-t "$image:latest" \
+				-f "$DOCKERFILE" .
+		else
+			docker buildx build \
+				--builder unity-meta-check-driver \
+				--platform linux/arm64,linux/amd64 \
+				--push \
+				-t "$image:$version" \
+				-f "$DOCKERFILE" .
 		fi
 
-		docker buildx build --builder unity-meta-check-driver --platform linux/arm64,linux/amd64 -t "$gh_action_image:$version" -f "$GH_ACTION_DOCKERFILE" .
 		if [[ "$arg" == "--latest" ]]; then
-			docker tag "$gh_action_image:$version" "$gh_action_image:latest"
+			docker buildx build \
+				--builder unity-meta-check-driver \
+				--platform linux/arm64,linux/amd64 \
+				--push \
+				-t "$gh_action_image:$version" \
+				-t "$gh_action_image:latest" \
+				-f "$GH_ACTION_DOCKERFILE" .
+		else
+			docker buildx build \
+				--builder unity-meta-check-driver \
+				--platform linux/arm64,linux/amd64 \
+				--push \
+				-t "$gh_action_image:$version" \
+				-f "$GH_ACTION_DOCKERFILE" .
 		fi
 
-		docker buildx build --builder unity-meta-check-driver --platform linux/arm64,linux/amd64 -t "$circleci_image:$version" -f "$CIRCLECI_DOCKERFILE" .
 		if [[ "$arg" == "--latest" ]]; then
-			docker tag "$circleci_image:$version" "$circleci_image:latest"
+			docker buildx build \
+				--builder unity-meta-check-driver \
+				--platform linux/arm64,linux/amd64 \
+				--push \
+				-t "$circleci_image:$version" \
+				-t "$circleci_image:latest" \
+				-f "$CIRCLECI_DOCKERFILE" .
+		else
+			docker buildx build \
+				--builder unity-meta-check-driver \
+				--platform linux/arm64,linux/amd64 \
+				--push \
+				-t "$circleci_image:$version" \
+				-f "$CIRCLECI_DOCKERFILE" .
 		fi
 	)
 }
