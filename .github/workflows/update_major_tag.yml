@@ -8,9 +8,11 @@ on:
 jobs:
   tag:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: nowsprinting/check-version-format-action@v3
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - uses: nowsprinting/check-version-format-action@98485692a883d962227b09f40f29a63de0771299 # v4.0.2
         id: version
         with:
           prefix: v
