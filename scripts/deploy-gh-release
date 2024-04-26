@@ -4,6 +4,12 @@ set -euo pipefail
 BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
 
 
+has() {
+	local cmd="$1"
+	which "$cmd" >/dev/null 2>&1
+}
+
+
 echo-stderr() {
 	local message="$*"
 	printf "%s\n" "$message" 1>&2
@@ -42,6 +48,14 @@ main() {
 	gh --version || throw "gh must be available (see https://cli.github.com/)"
 	gh auth status
 
+	local nproc=1
+	if has sysctl; then
+		nproc="$(sysctl -n hw.logicalcpu)"
+	fi
+	if has nproc; then
+		nproc="$(nproc)"
+	fi
+
 	(cd "$BASE_DIR"
 		local title
 		title="$(git log -1 --format=%s HEAD)"
@@ -70,7 +84,7 @@ main() {
 		echo-stderr
 		
 		echo-stderr "building executables..."
-		make clean all
+		make -j"$nproc" clean all
 		echo-stderr
 
 		[[ -d "./out" ]] || throw "cannot find the generated distribution dir: '${BASE_DIR}/out'"
