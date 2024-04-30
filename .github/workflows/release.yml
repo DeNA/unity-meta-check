@@ -44,6 +44,8 @@ jobs:
           file: ${{ matrix.images.dockerfile }}
           tags: ${{ matrix.images.image_name }}:latest
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Add version tag
         if: startsWith(github.ref, 'refs/tags/v')
@@ -53,3 +55,5 @@ jobs:
           file: ${{ matrix.images.dockerfile }}
           tags: ${{ matrix.images.image_name }}:${{ github.ref_name }}
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
