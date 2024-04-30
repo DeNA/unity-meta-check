@@ -29,7 +29,6 @@ usage: deploy [<options>]
 
 OPTIONS
 	-h, --help    print this usage
-	--latest      also tag the docker image as the latest
 EOS
 }
 
@@ -43,8 +42,6 @@ usage-error() {
 
 
 main() {
-	local arg="${1:-}"
-
 	has go || throw "'go' must be installed (see https://golang.org)"
 	has gh || throw "'gh' must be installed (see https://cli.github.com)"
 	has docker || throw "'docker' must be installed (see https://www.docker.com)"
@@ -65,12 +62,6 @@ main() {
 	(cd "$BASE_DIR"
 		./scripts/deploy-gh-release
 		./scripts/deploy-bins
-
-		if [[ "$arg" == "--latest" ]]; then
-			./scripts/deploy-images --latest
-		else
-			./scripts/deploy-images
-		fi
 	)
 }
 
