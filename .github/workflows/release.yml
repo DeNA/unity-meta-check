@@ -47,9 +47,31 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           file: ${{ matrix.images.dockerfile }}
-          tags: |
-            ${{ matrix.images.image_name }}:latest
-            ${{ matrix.images.image_name }}:${{ github.ref_name }}
+          tags: ${{ matrix.images.image_name }}:${{ github.ref_name }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Detect pre-release
+        id: check_tag
+        run: |
+          if [[ ! ${{ github.ref_name }} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "This is a pre-release tag"
+            echo "pre_release=true" >> $GITHUB_ENV
+            exit 0
+          else
+            echo "This is a not pre-release tag"
+            echo "pre_release=false" >> $GITHUB_ENV
+            exit 0
+          fi
+
+      - name: Add latest tag
+        if: steps.check_tag.outputs.pre_release != 'true'
+        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
+        with:
+          platforms: linux/amd64,linux/arm64
+          file: ${{ matrix.images.dockerfile }}
+          tags: ${{ matrix.images.image_name }}:latest
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
