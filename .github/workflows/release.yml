@@ -18,11 +18,6 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: nowsprinting/check-version-format-action@98485692a883d962227b09f40f29a63de0771299 # v4.0.2
-        id: version
-        with:
-          prefix: "v"
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
 
@@ -41,18 +36,9 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           file: build.Dockerfile
-          tags: ghcr.io/dena/unity-meta-check/unity-meta-check-builder:${{ github.ref_name }}
-          push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Add latest tag
-        if: steps.version.outputs.is_stable == 'true'
-        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
-        with:
-          platforms: linux/amd64,linux/arm64
-          file: ghcr.io/dena/unity-meta-check/unity-meta-check-builder
-          tags: ghcr.io/dena/unity-meta-check/unity-meta-check-builder:latest
+          tags: |
+            ghcr.io/dena/unity-meta-check/unity-meta-check-builder:${{ github.ref_name }}
+            ghcr.io/dena/unity-meta-check/unity-meta-check-builder:latest
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
