@@ -1,9 +1,5 @@
 version: 1
 
-before:
-  hooks:
-    - go mod tidy
-
 builds:
   - id: unity-meta-check
     binary: unity-meta-check
