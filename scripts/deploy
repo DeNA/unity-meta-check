@@ -43,13 +43,10 @@ usage-error() {
 
 main() {
 	has go || throw "'go' must be installed (see https://golang.org)"
-	has gh || throw "'gh' must be installed (see https://cli.github.com)"
-	has docker || throw "'docker' must be installed (see https://www.docker.com)"
 
 	local version
 	version="$("$BASE_DIR/scripts/print-version")"
 
-	gh auth status
 	go test ./...
 
 	local tag="v${version}"
@@ -60,7 +57,6 @@ main() {
 	git tag "$tag"
 
 	(cd "$BASE_DIR"
-		./scripts/deploy-gh-release
 		./scripts/deploy-bins
 	)
 }
