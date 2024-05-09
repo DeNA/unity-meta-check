@@ -121,6 +121,23 @@ jobs:
         with:
           aqua_version: v2.27.3
 
+      - uses: nowsprinting/check-version-format-action@98485692a883d962227b09f40f29a63de0771299 # v4.0.2
+        id: version
+        with:
+          prefix: "v"
+
+      - name: Create pre-release
+        if: steps.version.outputs.is_stable != 'true'
+        run: gh release create --prerelease --title ${{ github.ref_name }} ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        if: steps.version.outputs.is_stable == 'true'
+        run: gh release create --latest --title ${{ github.ref_name }} ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run goreleaser
         run: goreleaser release --clean
         env:
