@@ -108,6 +108,7 @@ jobs:
     name: Build and release binaries
     runs-on: ubuntu-latest
     permissions:
+      # Required to write release assets
       contents: write
 
     steps:
