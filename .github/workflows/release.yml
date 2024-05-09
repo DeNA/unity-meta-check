@@ -127,13 +127,13 @@ jobs:
 
       - name: Create pre-release
         if: steps.version.outputs.is_stable != 'true'
-        run: gh release create --prerelease --title $(git log -1 --format=%s HEAD) ${{ github.ref_name }}
+        run: gh release create --prerelease --title ${{ github.ref_name }} ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release
         if: steps.version.outputs.is_stable == 'true'
-        run: gh release create --title $(git log -1 --format=%s HEAD) ${{ github.ref_name }}
+        run: gh release create --latest --title ${{ github.ref_name }} ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
