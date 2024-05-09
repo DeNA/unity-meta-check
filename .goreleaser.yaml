@@ -74,6 +74,11 @@ builds:
 
 archives:
   - format: binary
+    name_template: >-
+      {{ .Binary }}-
+      {{- if eq .Os "Darwin" }}darwin-
+      {{- else if eq .Os "Linux" }}linux-
+      {{- else }}{{ .Os }}{{ end }}-{{ .Arch }}
     # https://goreleaser.com/errors/multiple-binaries-archive/
     allow_different_binary_count: true
 
