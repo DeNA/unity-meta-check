@@ -73,15 +73,12 @@ builds:
       - arm64
 
 archives:
-  - format: tar.gz
+  - format: binary
     name_template: >-
       {{ .Binary }}-
       {{- if eq .Os "Darwin" }}darwin-
       {{- else if eq .Os "Linux" }}linux-
       {{- else }}{{ .Os }}{{ end }}-{{ .Arch }}
-    format_overrides:
-      - goos: windows
-        format: zip
     # https://goreleaser.com/errors/multiple-binaries-archive/
     allow_different_binary_count: true
 
