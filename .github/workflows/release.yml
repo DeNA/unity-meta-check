@@ -104,7 +104,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  release-assets:
+  release-binaries:
     name: Build and release binaries
     runs-on: ubuntu-latest
     permissions:
