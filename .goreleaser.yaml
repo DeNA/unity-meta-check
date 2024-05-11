@@ -1,0 +1,89 @@
+version: 1
+
+builds:
+  - id: unity-meta-check
+    binary: unity-meta-check
+    main: ./main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: unity-meta-check-junit
+    binary: unity-meta-check-junit
+    main: ./tool/unity-meta-check-junit
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: gh-action
+    binary: gh-action
+    main: ./tool/gh-action
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+  - id: gh-action-yaml-gen
+    binary: gh-action-yaml-gen
+    main: ./tool/gh-action/action-yaml-gen
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: unity-meta-autofix
+    binary: unity-meta-autofix
+    main: ./tool/unity-meta-autofix
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: unity-meta-check-github-pr-comment
+    binary: unity-meta-check-github-pr-comment
+    main: ./tool/unity-meta-check-github-pr-comment
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: binary
+    name_template: >-
+      {{ .Binary }}-
+      {{- if eq .Os "Darwin" }}darwin-
+      {{- else if eq .Os "Linux" }}linux-
+      {{- else }}{{ .Os }}{{ end }}-{{ .Arch }}
+    # https://goreleaser.com/errors/multiple-binaries-archive/
+    allow_different_binary_count: true
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  prerelease: auto

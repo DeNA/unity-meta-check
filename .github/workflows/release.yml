@@ -105,3 +105,42 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  release-binaries:
+    name: Build and release binaries
+    runs-on: ubuntu-latest
+    permissions:
+      # Required to write release assets
+      contents: write
+
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          submodules: recursive
+
+      - name: Install aqua
+        uses: aquaproj/aqua-installer@4551ec64e21bf0f557c2525135ff0bd2cba40ec7 # v3.0.0
+        with:
+          aqua_version: v2.27.3
+
+      - uses: nowsprinting/check-version-format-action@98485692a883d962227b09f40f29a63de0771299 # v4.0.2
+        id: version
+        with:
+          prefix: "v"
+
+      - name: Create pre-release
+        if: steps.version.outputs.is_stable != 'true'
+        run: gh release create --prerelease --title ${{ github.ref_name }} ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        if: steps.version.outputs.is_stable == 'true'
+        run: gh release create --latest --title ${{ github.ref_name }} ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run goreleaser
+        run: goreleaser release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
