@@ -1,0 +1,71 @@
+#!/bin/bash
+set -euo pipefail
+
+BASE_DIR="$(cd "$(dirname "$0")/.."; pwd)"
+
+
+has() {
+	local cmd="$1"
+	which "$cmd" >/dev/null 2>&1
+}
+
+
+echo-stderr() {
+	local message="$*"
+	printf "%s\n" "$message" 1>&2
+}
+
+
+throw() {
+	local message="$*"
+	echo-stderr "error: $message"
+	false
+}
+
+
+usage() {
+	cat - 1>&2 <<-EOS
+usage: deploy [<options>]
+
+OPTIONS
+	-h, --help    print this usage
+EOS
+}
+
+
+usage-error() {
+	local message="$*"
+	echo-stderr "$message"
+	usage
+	false
+}
+
+
+main() {
+	has go || throw "'go' must be installed (see https://golang.org)"
+
+	local version
+	version="$("$BASE_DIR/scripts/print-version")"
+
+	go test ./...
+
+	local tag="v${version}"
+
+	if (git tag | grep -Fqx "$tag"); then
+		throw "a tag has the same name exists on local, so if still you want to overwrite the tag, please remove the tag on local and try again.: '$tag'"
+	fi
+	git tag "$tag"
+
+	(cd "$BASE_DIR"
+		./scripts/deploy-bins
+	)
+}
+
+
+case "$*" in
+	--help | -h)
+		usage
+		false ;;
+	*)
+		main "$@" ;;
+esac
