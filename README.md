@@ -165,20 +165,6 @@ jobs:
 
 
 
-### Using Git Submodules
-
-You can add [unity-meta-check-bins](https://github.com/dena/unity-meta-check-bins) as submodule into your git repository.
-This way is useful to ensure to use the same unity-meta-check version on CI or manual execution.
-
-```console
-$ cd /path/to/your/repo
-$ git submodule add git@github.com:dena/unity-meta-check-bins ./path/to/unity-meta-check-bins
-
-$ ./path/to/unity-meta-check-bins/unity-meta-check-easy -help
-```
-
-
-
 ### Download binaries
 
 Binaries are available on [releases](https://github.com/dena/unity-meta-check/releases).
