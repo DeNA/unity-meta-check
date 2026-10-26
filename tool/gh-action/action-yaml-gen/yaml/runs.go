@@ -6,8 +6,9 @@ import (
 
 const ImageName = "ghcr.io/dena/unity-meta-check/unity-meta-check-gh-action"
 
+// NOTE: .github/workflows/release.yml tags the image with the Git tag name, which has the "v" prefix.
 func ImageWithTag(version string) DockerImage {
-	return DockerImage(fmt.Sprintf("%s:%s", ImageName, version))
+	return DockerImage(fmt.Sprintf("%s:v%s", ImageName, version))
 }
 
 type (
