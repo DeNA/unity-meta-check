@@ -25,7 +25,7 @@ func TestSplitPathComponents(t *testing.T) {
 			actual := SplitPathElements(c.path)
 
 			if !reflect.DeepEqual(actual, c.expected) {
-				t.Errorf(cmp.Diff(c.expected, actual))
+				t.Error(cmp.Diff(c.expected, actual))
 				return
 			}
 		})
